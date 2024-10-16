@@ -1,0 +1,24 @@
+Dokumentasi API
+
+Unduh Komentar YouTube
+Endpoint: POST /api/youtube/comments
+Body:
+{
+"url": "URL_VIDEO",    // URL video YouTube (wajib)
+"pretty": false,       // Format hasil (opsional)
+"sort": 1,             // 0: Populer, 1: Terbaru (default)
+"language": "id"       // Bahasa komentar (opsional)
+}
+Response: { "job_id": "ID_JOB" }
+
+Hasil Komentar
+Endpoint: GET /api/youtube/comments/result/{job_id}
+Response: Hasil komentar dan analisis.
+
+Hasil Analisis Sentimen
+Endpoint: GET /api/youtube/comments/sentiment/{job_id}
+Response: Hasil analisis sentimen.
+
+Hasil Keyword
+Endpoint: GET /api/youtube/comments/keywords/{job_id}
+Response: Daftar keyword.

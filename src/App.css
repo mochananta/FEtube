@@ -1,0 +1,200 @@
+body {
+  font-family: 'Roboto', sans-serif; 
+  margin: 10px;
+  padding: 10px;
+}
+
+.main-container {
+  padding: 20px;
+}
+
+.video-detail {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 20px;
+  margin: 30px;
+}
+
+.video-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.video-description-container {
+  max-height: 150px; 
+  overflow-y: auto; 
+  margin-top: 10px;
+}
+
+.video-description {
+  font-size: 14px;
+  color: #666;
+}
+
+.video-channel {
+  font-size: 14px;
+  color: #777;
+  margin-top: 10px;
+}
+
+.channel-name {
+  font-weight: bold;
+  color: black; 
+}
+
+.video-channel img {
+  vertical-align: middle;
+}
+
+.comment-keyword-paper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.comment-keyword-container {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.comment-chip {
+  margin: 5px;
+  background-color: #e0e0e0;
+  color: #000000;
+  font-size: 14px;
+  border-radius: 20px;
+  padding: 5px 15px;
+  border: 2px solid #000000;
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+.comment-chip:hover {
+  background-color: #C7C7C7;
+  color: #000000;
+  cursor: pointer;   
+}
+
+
+.sentiment-paper {
+  margin-top: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sentiment-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sentiment-chart {
+  flex: 1;
+  max-width: 250px;
+  margin-right: 20px;
+}
+
+.sentiment-details {
+  flex: 1;
+  text-align: left;
+}
+
+.sentiment-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.sentiment-total {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.comment-table-paper {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px; 
+}
+
+.comment-table-paper table {
+  width: 100%;
+}
+
+.comment-table-paper th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.comment-table-paper td {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.comment-table-paper .MuiTableCell-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.pagination {
+  margin-top: 20px;
+}
+
+hr {
+  border: 1px solid #e4e0e0;
+}
+
+h5, h6 {
+  margin: 0;
+}
+
+.button {
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.btn-download {
+  background-color: transparent; 
+  border: none;
+  outline: none; 
+  cursor: default; 
+}
+
+.btn-download:hover {
+  background-color: transparent; 
+}
+
+.btn-download:focus {
+  outline: none; 
+}
+
+.btn-download:active {
+  background-color: transparent; 
+}
+
+.custom-select {
+  margin: 10px;
+  min-width: 50px;
+  background: none;
+  border: none;
+}
+
+.custom-select:before,
+.custom-select:after,
+.custom-select:hover,
+.custom-select:focus {
+  border-bottom: none !important; 
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+}
+
