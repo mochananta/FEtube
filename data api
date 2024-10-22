@@ -1,18 +1,18 @@
 Dokumentasi API
 
 Unduh Komentar YouTube
-Endpoint: POST /api/youtube/comments
+Endpoint: POST http://207.148.117.200:8000/api/youtube/comments
 Body:
 {
-"url": "URL_VIDEO",    // URL video YouTube (wajib)
-"pretty": false,       // Format hasil (opsional)
-"sort": 1,             // 0: Populer, 1: Terbaru (default)
-"language": "id"       // Bahasa komentar (opsional)
+"url": "URL_VIDEO",   
+"pretty": false,       
+"sort": 1,            
+"language": "id"   
 }
 Response: { "job_id": "ID_JOB" }
 
 Hasil Komentar
-Endpoint: GET /api/youtube/comments/result/{job_id}
+Endpoint: GET http://207.148.117.200:8000/api/youtube/comments/result/{job_id}
 Response: Hasil komentar dan analisis.
 
 Hasil Analisis Sentimen
