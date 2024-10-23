@@ -83,7 +83,7 @@ function App() {
         setError("Terjadi kesalahan saat mengambil data. Silakan coba lagi!!");
       }
       console.error("Error fetching comments:", error);
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -108,7 +108,7 @@ function App() {
             setComments(result.comments);
             setAllComments(result.comments);
             setTotalComments(result.comments.length);
-            // setLoading(false);
+            setLoading(false);
             clearInterval(poll);
             fetchCommentKeywords(jobId);
           } else {
@@ -124,7 +124,7 @@ function App() {
         console.error("Polling error:", error);
         setError("Terjadi kesalahan saat mengambil hasil komentar.");
         clearInterval(poll);
-        // setLoading(false);
+        setLoading(false);
       }
     }, interval);
   };
@@ -347,7 +347,7 @@ function App() {
               Comment Keywords
             </Typography>
             {loading ? (
-              <div className="loading-video" >
+              <div className="loading-video">
                 <CircularProgress />
                 Loading comment keywords...
               </div>
@@ -447,7 +447,7 @@ function App() {
                 </div>
                 <TableContainer>
                   <Table>
-                  <TableHead>
+                    <TableHead>
                       <TableRow>
                         <TableCell>No</TableCell>
                         <TableCell>User</TableCell>
@@ -468,6 +468,7 @@ function App() {
                               <span style={{ color: "#3EA6FF" }}>{comment.id}</span>
                             </TableCell>
                             <TableCell>{comment.text}</TableCell>
+                            <TableCell>{comment.channel}</TableCell>
                             <TableCell>{formatDate(comment.comment_at)}</TableCell>
                             <TableCell>
                               <span
@@ -482,17 +483,21 @@ function App() {
                               </span>
                             </TableCell>
                             <TableCell>
-                              <span
-                                style={{
-                                  padding: "5px 10px",
-                                  backgroundColor: comment.sentiment.label === "positive" ? "#34C759" : comment.sentiment.label === "neutral" ? "#3EA6FF" : "#CC0000",
-                                  color: "#fff",
-                                  borderRadius: "20px",
-                                  width: "100%",
-                                }}
-                              >
-                                {comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1) || "N/A"}
-                              </span>
+                              {comment.sentiment && comment.sentiment.label ? (
+                                <span
+                                  style={{
+                                    padding: "5px 10px",
+                                    backgroundColor: comment.sentiment.label === "positive" ? "#34C759" : comment.sentiment.label === "neutral" ? "#3EA6FF" : "#CC0000",
+                                    color: "#fff",
+                                    borderRadius: "20px",
+                                    width: "100%",
+                                  }}
+                                >
+                                  {comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1)}
+                                </span>
+                              ) : (
+                                <span style={{ color: "#CC0000" }}>Unknown</span>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))
