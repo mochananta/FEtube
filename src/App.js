@@ -7,7 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import "./css/App.js";
+import ".App.css";
 
 Chart.register(...registerables);
 
