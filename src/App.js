@@ -3,10 +3,11 @@ import { Chart, registerables } from "chart.js";
 import { TextField, Button, Grid, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, InputAdornment } from "@mui/material";
 import { Pie } from "react-chartjs-2";
 import DownloadIcon from "@mui/icons-material/Download";
+import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import "./App.css";
+import "./css/App.js";
 
 Chart.register(...registerables);
 
@@ -19,13 +20,14 @@ function App() {
   const [fetchedVideoDetails, setFetchedVideoDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
+  const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
+  const [sortConfig, setSortConfig] = useState({ key: "No", direction: "asc" });
   const commentsPerPage = 5;
   const totalPages = Math.ceil(comments.length / commentsPerPage);
   const indexOfLastComment = currentPage * commentsPerPage;
   const indexOfFirstComment = indexOfLastComment - commentsPerPage;
-  // const currentComments = comments.slice(indexOfFirstComment, indexOfLastComment);
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -39,15 +41,6 @@ function App() {
       },
     ],
   });
-
-  const videoDetails = {
-    // title: "🔥🔥 BARÇA 5-1 VIKTORIA PLZEN, LEWY STUNS WITH FIRST HAT-TRICK | UN DÍA DE PARTIT (EPISODE 2) 🔥🔥",
-    // description:
-    //   "Lorem ipsum odor amet, consectetuer adipiscing elit. Ablandit risus placerat senectus aptent pulvinar curae class arcu. Magna tellus ad per litora lacinia eu consequat vivamus. At lectus dictum pretium maximus pretium dolor cursus justo. Ac habitasse purus conubia auctor eleifend bibendum ac class finibus. Fames hac vel eget ipsum lectus fusce velit. Torquent commodo senectus posuere metus hac ullamcorper. Venenatis posuere enim urna in lorem metus; praesent habitasse curabitur.",
-    // channelName: "FC Barcelona",
-    // subscribers: "14.1M",
-    keywords: ["Barcelona", "Real Madrid", "Lewandowski", "Referee", "Vinicius", "Uefalona", "Vardrid", "El-clasico", "CR7", "LM10", "CR7", "Salah", "Gakpo", "VanDick", "Premire League", "Liverpool", "FC Mobile"],
-  };
 
   const handleFetchComments = async () => {
     setLoading(true);
@@ -99,7 +92,7 @@ function App() {
 
     const poll = setInterval(async () => {
       try {
-        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}`);
+        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}?limit=100`);
 
         if (response.ok) {
           const result = await response.json();
@@ -117,6 +110,7 @@ function App() {
             setTotalComments(result.comments.length);
             setLoading(false);
             clearInterval(poll);
+            fetchCommentKeywords(jobId);
           } else {
             throw new Error("Comments not found in result.");
           }
@@ -146,6 +140,25 @@ function App() {
     } catch (error) {
       console.error("Error fetching video details:", error);
       setError("Terjadi kesalahan saat mengambil detail video.");
+    }
+  };
+
+  const fetchCommentKeywords = async (jobId) => {
+    try {
+      const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/keywords/${jobId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch comment keywords");
+      }
+
+      const data = await response.json();
+      if (data.keyword_analysis) {
+        setKeywords(data.keyword_analysis);
+      } else {
+        throw new Error("Keyword analysis not found in response");
+      }
+    } catch (error) {
+      console.error("Error fetching comment keywords:", error);
     }
   };
 
@@ -183,6 +196,33 @@ function App() {
     setTotalComments(totalSentiments);
   }, [comments]);
 
+  const handleSort = (column) => {
+    let direction = "asc";
+    if (sortConfig.key === column && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key: column, direction });
+  };
+
+  const sortedComments = [...comments].sort((a, b) => {
+    if (sortConfig.key === "No") {
+      return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
+    } else if (sortConfig.key === "User") {
+      return sortConfig.direction === "asc" ? a.author.localeCompare(b.author) : b.author.localeCompare(a.author);
+    } else if (sortConfig.key === "Comment ID") {
+      return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
+    } else if (sortConfig.key === "Comment content") {
+      return sortConfig.direction === "asc" ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text);
+    } else if (sortConfig.key === "Comment at") {
+      return sortConfig.direction === "asc" ? new Date(a.comment_at) - new Date(b.comment_at) : new Date(b.comment_at) - new Date(a.comment_at);
+    } else if (sortConfig.key === "Comment keyword") {
+      return sortConfig.direction === "asc" ? (a.keyword || "").localeCompare(b.keyword || "") : (b.keyword || "").localeCompare(a.keyword || "");
+    } else if (sortConfig.key === "Sentiment") {
+      return sortConfig.direction === "asc" ? a.sentiment.label.localeCompare(b.sentiment.label) : b.sentiment.label.localeCompare(a.sentiment.label);
+    }
+    return 0;
+  });
+
   const convertCommentsToCSV = (comments) => {
     const headers = ["Index", "Author", "Comment ID", "Text", "Channel", "Comment Date", "Keyword", "Sentiment"];
     const rows = comments.map((comment, index) => [
@@ -217,15 +257,22 @@ function App() {
     return matchesSearchTerm && matchesSentiment;
   });
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  };
+
   const commentsToDisplay = filteredComments.slice(indexOfFirstComment, indexOfLastComment);
 
   return (
     <>
-      {loading && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
       <Grid container spacing={3} className="main-container">
         <Grid item xs={12} style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", padding: "10px" }}>
@@ -238,9 +285,6 @@ function App() {
         </Grid>
 
         {/* Form Input API Key dan YouTube URL */}
-        <Grid item xs={12} md={6}>
-          <TextField fullWidth label="API Key here...." variant="outlined" style={{ marginBottom: "10px" }} />
-        </Grid>
         <Grid item xs={12} md={6}>
           <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} style={{ marginBottom: "10px" }} />
         </Grid>
@@ -297,17 +341,23 @@ function App() {
           </Paper>
         </div>
 
-        {/* Comment Keywords Section */}
         <Grid item xs={12} md={6}>
           <div elevation={3} className="comment-keyword-paper">
             <Typography variant="h6" style={{ fontWeight: "bold", marginBottom: "10px" }}>
-              Comment keyword
+              Comment Keywords
             </Typography>
-            <div className="comment-keyword-container">
-              {videoDetails.keywords.map((keyword, index) => (
-                <Chip key={index} label={keyword} className="comment-chip" />
-              ))}
-            </div>
+            {loading ? (
+              <div className="loading-video">
+                <CircularProgress />
+                Loading comment keywords...
+              </div>
+            ) : (
+              <div className="comment-keyword-container">
+                {keywords.map((keyword, index) => (
+                  <Chip key={index} label={keyword} className="comment-chip" />
+                ))}
+              </div>
+            )}
           </div>
         </Grid>
 
@@ -315,139 +365,155 @@ function App() {
           <Typography variant="h6" style={{ fontWeight: "bold", marginBottom: "18px", marginLeft: "15px" }}>
             Sentiment Analytic
           </Typography>
-          <div className="sentiment-container">
-            {/* Pie chart */}
-            <div className="sentiment-chart">
-              <Pie data={sentimentData} />
-            </div>
 
-            {/* Deskripsi Analitik Sentimen */}
-            <div className="sentiment-details">
-              <Typography variant="body2" className="sentiment-total" style={{ fontWeight: "bold", marginBottom: "5px" }}>
-                {totalComments} Sentiments
-              </Typography>
-              <div className="sentiment-item">
-                <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
-                <span>
-                  Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0)}%
-                </span>
+          {loading ? (
+            <div className="loading-sentiment">
+              <CircularProgress />
+              Loading sentiment analytic...
+            </div>
+          ) : (
+            <div className="sentiment-container">
+              {/* Pie chart */}
+              <div className="sentiment-chart">
+                <Pie data={sentimentData} />
               </div>
-              <div className="sentiment-item">
-                <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
-                <span>
-                  Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0)}%
-                </span>
-              </div>
-              <div className="sentiment-item">
-                <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
-                <span>
-                  Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0)}%
-                </span>
+
+              {/* Deskripsi Analitik Sentimen */}
+              <div className="sentiment-details">
+                <Typography variant="body2" className="sentiment-total" style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                  {totalComments} Sentiments
+                </Typography>
+                <div className="sentiment-item">
+                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
+                  <span>
+                    Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <div className="sentiment-item">
+                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
+                  <span>
+                    Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <div className="sentiment-item">
+                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
+                  <span>
+                    Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0)}%
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
+
         {/* Table Comment Section */}
         <Grid item xs={12}>
           <Typography variant="h6" style={{ fontWeight: "bold", marginBottom: "10px" }}>
             Extracted Comment <i style={{ color: "#CC0000" }}>({totalComments})</i>
           </Typography>
           <div elevation={3} className="comment-table-paper" style={{ marginTop: "20px", marginBottom: "20px", padding: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", width: "100%" }}>
-              <TextField
-                className="search-input"
-                variant="outlined"
-                label="Search..."
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                style={{ flex: 1, marginRight: "10px" }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={(e) => setSelectedSentiment(e.target.value)}>
-                <MenuItem value="All sentiment">All sentiment</MenuItem>
-                <MenuItem value="Positive">Positive</MenuItem>
-                <MenuItem value="Neutral">Neutral</MenuItem>
-                <MenuItem value="Negative">Negative</MenuItem>
-              </Select>
-              <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
-                <DownloadIcon />
-              </Button>
-            </div>
+            {loading ? ( // Tambahkan kondisi loading
+              <div className="loading-comments">
+                <CircularProgress />
+                Loading comments...
+              </div>
+            ) : (
+              <>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", width: "100%" }}>
+                  <TextField
+                    className="search-input"
+                    variant="outlined"
+                    label="Search..."
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                    style={{ flex: 1, marginRight: "10px" }}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={(e) => setSelectedSentiment(e.target.value)}>
+                    <MenuItem value="All sentiment">All sentiment</MenuItem>
+                    <MenuItem value="Positive">Positive</MenuItem>
+                    <MenuItem value="Neutral">Neutral</MenuItem>
+                    <MenuItem value="Negative">Negative</MenuItem>
+                  </Select>
+                  <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
+                    <DownloadIcon />
+                  </Button>
+                </div>
 
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>No</TableCell>
-                    <TableCell>User</TableCell>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Comment</TableCell>
-                    <TableCell>Channel</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Keyword</TableCell>
-                    <TableCell>Sentiment</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {commentsToDisplay.length > 0 ? (
-                    commentsToDisplay.map((comment, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{indexOfFirstComment + index + 1}</TableCell>
-                        <TableCell>{comment.author}</TableCell>
-                        <TableCell>
-                          <span style={{ color: "#3EA6FF" }}>{comment.id}</span>
-                        </TableCell>
-                        <TableCell>{comment.text}</TableCell>
-                        <TableCell>{comment.channel}</TableCell>
-                        <TableCell>{comment.comment_at}</TableCell>
-                        <TableCell>
-                          <span
-                            style={{
-                              padding: "5px 10px",
-                              border: "1px solid #000000FF",
-                              color: "#000000FF",
-                              borderRadius: "20px",
-                            }}
-                          >
-                            {comment.keyword || "N/A"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            style={{
-                              padding: "5px 10px",
-                              backgroundColor: comment.sentiment.label === "positive" ? "#34C759" : comment.sentiment.label === "neutral" ? "#3EA6FF" : "#CC0000",
-                              color: "#fff",
-                              borderRadius: "20px",
-                              width: "100%",
-                            }}
-                          >
-                            {comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1)}
-                          </span>
-                        </TableCell>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell onClick={() => handleSort("No")}>No {sortConfig.key === "No" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("User")}>User {sortConfig.key === "User" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("Comment ID")}>Comment ID {sortConfig.key === "Comment ID" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("Comment content")}>Comment content {sortConfig.key === "Comment content" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("Comment at")}>Comment at {sortConfig.key === "Comment at" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("Comment keyword")}>Comment keyword {sortConfig.key === "Comment keyword" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell onClick={() => handleSort("Sentiment")}>Sentiment {sortConfig.key === "Sentiment" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={10} align="center" style={{ fontStyle: "italic" }}>
-                        Tidak ada komentar
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {commentsToDisplay.length > 0 ? (
+                        commentsToDisplay.map((comment, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{indexOfFirstComment + index + 1}</TableCell>
+                            <TableCell>{comment.author}</TableCell>
+                            <TableCell>
+                              <span style={{ color: "#3EA6FF" }}>{comment.id}</span>
+                            </TableCell>
+                            <TableCell>{comment.text}</TableCell>
+                            <TableCell>{formatDate(comment.comment_at)}</TableCell>
+                            <TableCell>
+                              <span
+                                style={{
+                                  padding: "5px 10px",
+                                  border: "1px solid #000000FF",
+                                  color: "#000000FF",
+                                  borderRadius: "20px",
+                                }}
+                              >
+                                {comment.keyword || "N/A"}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                style={{
+                                  padding: "5px 10px",
+                                  backgroundColor: comment.sentiment.label === "positive" ? "#34C759" : comment.sentiment.label === "neutral" ? "#3EA6FF" : "#CC0000",
+                                  color: "#fff",
+                                  borderRadius: "20px",
+                                  width: "100%",
+                                }}
+                              >
+                                {comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1) || "N/A"}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={10} align="center" style={{ fontStyle: "italic" }}>
+                            Tidak ada komentar
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
-            {/* Pagination */}
-            <Grid item xs={12}>
-              <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" style={{ marginTop: "20px", display: "flex", justifyContent: "center" }} />
-            </Grid>
+                {/* Pagination */}
+                <Grid item xs={12}>
+                  {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" style={{ marginTop: "20px", display: "flex", justifyContent: "center" }} />}
+                </Grid>
+              </>
+            )}
           </div>
         </Grid>
       </Grid>

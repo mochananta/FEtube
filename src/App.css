@@ -9,14 +9,25 @@ body {
 }
 
 .loading-video {
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: #555; 
-  margin-top: 20px;
-  padding: 10px;
-  background-color: #f0f0f0; /* Latar belakang abu-abu terang */
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.loading-spinner {
+  border: 8px solid #f3f3f3; 
+  border-top: 8px solid #3498db; 
+  border-radius: 50%;
+  margin: 5px;
+  width: 50px; 
+  height: 50px; 
+  animation: spin 2s linear infinite; 
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .video-detail {
