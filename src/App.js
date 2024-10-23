@@ -5,8 +5,8 @@ import { Pie } from "react-chartjs-2";
 import DownloadIcon from "@mui/icons-material/Download";
 import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+// import MenuItem from "@mui/material/MenuItem";
+// import Select from "@mui/material/Select";
 import "./App.css";
 
 Chart.register(...registerables);
@@ -22,8 +22,8 @@ function App() {
   const [totalComments, setTotalComments] = useState(0);
   const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
-  // const [sortConfig, setSortConfig] = useState({ key: "No", direction: "asc" });
+  const [jobId, setJobId] = useState(null);
+  // const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
   const commentsPerPage = 5;
   const totalPages = Math.ceil(comments.length / commentsPerPage);
   const indexOfLastComment = currentPage * commentsPerPage;
@@ -41,6 +41,11 @@ function App() {
       },
     ],
   });
+
+  const loadMoreComments = () => {
+    pollJobStatus(jobId, currentPage + 1);
+    setCurrentPage(currentPage + 1); 
+  };
 
   const handleFetchComments = async () => {
     setLoading(true);
@@ -87,38 +92,54 @@ function App() {
     }
   };
 
-  const pollJobStatus = async (jobId, retries = 20, interval = 10000) => {
+  const pollJobStatus = async (jobId, page = 1, retries = 20, interval = 10000) => {
     let attempts = 0;
-
+  
     const poll = setInterval(async () => {
       try {
-        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}`);
-
+        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}?page=${page}&limit=100`);
         if (response.ok) {
           const result = await response.json();
           console.log("Polling result:", result);
-
+  
           if (result.detail) {
             console.log(result.detail);
             attempts++;
+            if (attempts >= retries) {
+              clearInterval(poll); // Berhenti setelah beberapa percobaan
+              setError("Gagal mendapatkan komentar setelah beberapa kali percobaan.");
+              setLoading(false);
+            }
             return;
           }
-
+  
           if (result && Array.isArray(result.comments)) {
-            setComments(result.comments);
-            setAllComments(result.comments);
-            setTotalComments(result.comments.length);
-            setLoading(false);
-            clearInterval(poll);
+            setComments((prevComments) => [...prevComments, ...result.comments]);
+            setAllComments((prevComments) => [...prevComments, ...result.comments]);
+            
+            // Update totalComments here with the number of new comments
+            setTotalComments((prevTotal) => prevTotal + result.comments.length);
+  
+            // Perbarui sentimen dan keywords
+            const totalSentiments = calculateSentimentData([...allComments, ...result.comments]);
+            setTotalComments(totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative); // Update totalComments
+  
             fetchCommentKeywords(jobId);
+  
+            if (result.comments.length < 60) {
+              clearInterval(poll); // Hentikan polling jika batch terakhir kurang dari limit (60)
+              setLoading(false);
+            } else {
+              setTimeout(() => pollJobStatus(jobId, page + 1), interval); // Ambil batch berikutnya
+            }
           } else {
             throw new Error("Comments not found in result.");
           }
-
-          clearInterval(poll);
+  
         } else if (attempts >= retries) {
           clearInterval(poll);
-          throw new Error("Job result not found after multiple attempts.");
+          setError("Gagal mendapatkan komentar setelah beberapa kali percobaan.");
+          setLoading(false);
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -146,14 +167,14 @@ function App() {
   const fetchCommentKeywords = async (jobId) => {
     try {
       const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/keywords/${jobId}`);
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch comment keywords");
       }
-
+  
       const data = await response.json();
       if (data.keyword_analysis) {
-        setKeywords(data.keyword_analysis);
+        setKeywords(prevKeywords => [...prevKeywords, ...data.keyword_analysis]); 
       } else {
         throw new Error("Keyword analysis not found in response");
       }
@@ -168,16 +189,15 @@ function App() {
       Neutral: 0,
       Negative: 0,
     };
-
+  
     comments.forEach((comment) => {
-      const sentiment = comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1);
-      if (sentimentCounts[sentiment] !== undefined) {
-        sentimentCounts[sentiment]++;
+      const sentimentLabel = comment.sentiment_label;
+  
+      if (sentimentCounts[sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1)] !== undefined) {
+        sentimentCounts[sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1)]++;
       }
     });
-
-    const totalSentiments = comments.length;
-
+  
     setSentimentData({
       labels: ["Positive", "Neutral", "Negative"],
       datasets: [
@@ -187,54 +207,27 @@ function App() {
         },
       ],
     });
-
-    return totalSentiments;
+  
+    return sentimentCounts;
   };
-
+  
   useEffect(() => {
     const totalSentiments = calculateSentimentData(comments);
-    setTotalComments(totalSentiments);
+    setTotalComments(totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative); // Update totalComments
   }, [comments]);
-
-  // const handleSort = (column) => {
-  //   let direction = "asc";
-  //   if (sortConfig.key === column && sortConfig.direction === "asc") {
-  //     direction = "desc";
-  //   }
-  //   setSortConfig({ key: column, direction });
-  // };
-
-  // const sortedComments = [...comments].sort((a, b) => {
-  //   if (sortConfig.key === "No") {
-  //     return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
-  //   } else if (sortConfig.key === "User") {
-  //     return sortConfig.direction === "asc" ? a.author.localeCompare(b.author) : b.author.localeCompare(a.author);
-  //   } else if (sortConfig.key === "Comment ID") {
-  //     return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
-  //   } else if (sortConfig.key === "Comment content") {
-  //     return sortConfig.direction === "asc" ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text);
-  //   } else if (sortConfig.key === "Comment at") {
-  //     return sortConfig.direction === "asc" ? new Date(a.comment_at) - new Date(b.comment_at) : new Date(b.comment_at) - new Date(a.comment_at);
-  //   } else if (sortConfig.key === "Comment keyword") {
-  //     return sortConfig.direction === "asc" ? (a.keyword || "").localeCompare(b.keyword || "") : (b.keyword || "").localeCompare(a.keyword || "");
-  //   } else if (sortConfig.key === "Sentiment") {
-  //     return sortConfig.direction === "asc" ? a.sentiment.label.localeCompare(b.sentiment.label) : b.sentiment.label.localeCompare(a.sentiment.label);
-  //   }
-  //   return 0;
-  // });
 
   const convertCommentsToCSV = (comments) => {
     const headers = ["Index", "Author", "Comment ID", "Text", "Channel", "Comment Date", "Keyword", "Sentiment"];
     const rows = comments.map((comment, index) => [
       index + 1,
       comment.author,
-      comment.id,
+      comment.comment_id || comment.id,
       comment.text.replace(/"/g, '""'),
-      comment.channel,
       comment.comment_at,
-      comment.keyword || "N/A",
-      comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1),
+      comment.keywords.length > 0 ? comment.keywords.join(", ") : "N/A",
+      comment.sentiment ? comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1) : "Unknown", // Cek apakah sentiment ada
     ]);
+
     return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
   };
 
@@ -244,7 +237,7 @@ function App() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "comments.csv");
+    link.setAttribute("download", "Comments-Youtube.csv");
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -253,8 +246,9 @@ function App() {
 
   const filteredComments = comments.filter((comment) => {
     const matchesSearchTerm = comment.text && comment.text.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment.label.toLowerCase() === selectedSentiment.toLowerCase();
-    return matchesSearchTerm && matchesSentiment;
+    // const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment.label.toLowerCase() === selectedSentiment.toLowerCase();
+    return matchesSearchTerm;
+    // matchesSentiment
   });
 
   const formatDate = (dateString) => {
@@ -351,12 +345,16 @@ function App() {
                 <CircularProgress />
                 Loading comment keywords...
               </div>
-            ) : (
+            ) : keywords.length > 0 ? (
               <div className="comment-keyword-container">
                 {keywords.map((keyword, index) => (
                   <Chip key={index} label={keyword} className="comment-chip" />
                 ))}
               </div>
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No keywords found for the comments.
+              </Typography>
             )}
           </div>
         </Grid>
@@ -375,7 +373,13 @@ function App() {
             <div className="sentiment-container">
               {/* Pie chart */}
               <div className="sentiment-chart">
-                <Pie data={sentimentData} />
+                {sentimentData.datasets[0].data.some((value) => value > 0) ? ( // Memeriksa apakah ada nilai positif
+                  <Pie data={sentimentData} />
+                ) : (
+                  <Typography variant="body2" style={{ textAlign: "center" }}>
+                    No sentiment data available.
+                  </Typography>
+                )}
               </div>
 
               {/* Deskripsi Analitik Sentimen */}
@@ -386,19 +390,19 @@ function App() {
                 <div className="sentiment-item">
                   <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
                   <span>
-                    Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0)}%
+                    Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
                 <div className="sentiment-item">
                   <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
                   <span>
-                    Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0)}%
+                    Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
                 <div className="sentiment-item">
                   <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
                   <span>
-                    Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0)}%
+                    Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
                   </span>
                 </div>
               </div>
@@ -435,12 +439,12 @@ function App() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={(e) => setSelectedSentiment(e.target.value)}>
+                  {/* <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={(e) => setSelectedSentiment(e.target.value)}>
                     <MenuItem value="All sentiment">All sentiment</MenuItem>
                     <MenuItem value="Positive">Positive</MenuItem>
                     <MenuItem value="Neutral">Neutral</MenuItem>
                     <MenuItem value="Negative">Negative</MenuItem>
-                  </Select>
+                  </Select> */}
                   <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
                     <DownloadIcon />
                   </Button>
@@ -465,45 +469,46 @@ function App() {
                             <TableCell>{indexOfFirstComment + index + 1}</TableCell>
                             <TableCell>{comment.author}</TableCell>
                             <TableCell>
-                              <span style={{ color: "#3EA6FF" }}>{comment.id}</span>
+                              <span style={{ color: "#3EA6FF" }}>{comment.comment_id}</span>
                             </TableCell>
                             <TableCell>{comment.text}</TableCell>
-                            <TableCell>{comment.channel}</TableCell>
                             <TableCell>{formatDate(comment.comment_at)}</TableCell>
+                            <TableCell>
+                              {comment.keywords.map((keyword, index) => (
+                                <span
+                                  key={index}
+                                  style={{
+                                    padding: "5px 10px",
+                                    border: "1px solid #000000FF",
+                                    color: "#000000FF",
+                                    borderRadius: "20px",
+                                    margin: "5px",
+                                    display: "inline-block",
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  {keyword}
+                                </span>
+                              ))}
+                            </TableCell>
                             <TableCell>
                               <span
                                 style={{
                                   padding: "5px 10px",
-                                  border: "1px solid #000000FF",
-                                  color: "#000000FF",
+                                  backgroundColor: comment.sentiment_label === "positive" ? "#34C759" : comment.sentiment_label === "neutral" ? "#3EA6FF" : comment.sentiment_label === "negative" ? "#CC0000" : "#CCCCCC",
+                                  color: "#fff",
                                   borderRadius: "20px",
+                                  width: "100%",
                                 }}
                               >
-                                {comment.keyword || "N/A"}
+                                {comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}
                               </span>
-                            </TableCell>
-                            <TableCell>
-                              {comment.sentiment && comment.sentiment.label ? (
-                                <span
-                                  style={{
-                                    padding: "5px 10px",
-                                    backgroundColor: comment.sentiment.label === "positive" ? "#34C759" : comment.sentiment.label === "neutral" ? "#3EA6FF" : "#CC0000",
-                                    color: "#fff",
-                                    borderRadius: "20px",
-                                    width: "100%",
-                                  }}
-                                >
-                                  {comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1)}
-                                </span>
-                              ) : (
-                                <span style={{ color: "#CC0000" }}>Unknown</span>
-                              )}
                             </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={10} align="center" style={{ fontStyle: "italic" }}>
+                          <TableCell colSpan={7} align="center" style={{ fontStyle: "italic" }}>
                             Tidak ada komentar
                           </TableCell>
                         </TableRow>
@@ -511,7 +516,6 @@ function App() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-
                 {/* Pagination */}
                 <Grid item xs={12}>
                   {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" style={{ marginTop: "20px", display: "flex", justifyContent: "center" }} />}

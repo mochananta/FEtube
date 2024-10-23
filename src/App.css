@@ -88,7 +88,8 @@ body {
   margin: 5px;
   background-color: #e0e0e0;
   color: #000000;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
   border-radius: 20px;
   padding: 5px 15px;
   border: 2px solid #000000;
