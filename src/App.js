@@ -7,7 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import ".App.css";
+import "./App.css";
 
 Chart.register(...registerables);
 
@@ -445,7 +445,6 @@ function App() {
                     <DownloadIcon />
                   </Button>
                 </div>
-
                 <TableContainer>
                   <Table>
                     <TableHead>
