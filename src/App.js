@@ -23,7 +23,7 @@ function App() {
   const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
-  const [sortConfig, setSortConfig] = useState({ key: "No", direction: "asc" });
+  // const [sortConfig, setSortConfig] = useState({ key: "No", direction: "asc" });
   const commentsPerPage = 5;
   const totalPages = Math.ceil(comments.length / commentsPerPage);
   const indexOfLastComment = currentPage * commentsPerPage;
@@ -83,7 +83,7 @@ function App() {
         setError("Terjadi kesalahan saat mengambil data. Silakan coba lagi!!");
       }
       console.error("Error fetching comments:", error);
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -92,7 +92,7 @@ function App() {
 
     const poll = setInterval(async () => {
       try {
-        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}?limit=100`);
+        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}`);
 
         if (response.ok) {
           const result = await response.json();
@@ -108,7 +108,7 @@ function App() {
             setComments(result.comments);
             setAllComments(result.comments);
             setTotalComments(result.comments.length);
-            setLoading(false);
+            // setLoading(false);
             clearInterval(poll);
             fetchCommentKeywords(jobId);
           } else {
@@ -124,7 +124,7 @@ function App() {
         console.error("Polling error:", error);
         setError("Terjadi kesalahan saat mengambil hasil komentar.");
         clearInterval(poll);
-        setLoading(false);
+        // setLoading(false);
       }
     }, interval);
   };
@@ -196,32 +196,32 @@ function App() {
     setTotalComments(totalSentiments);
   }, [comments]);
 
-  const handleSort = (column) => {
-    let direction = "asc";
-    if (sortConfig.key === column && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key: column, direction });
-  };
+  // const handleSort = (column) => {
+  //   let direction = "asc";
+  //   if (sortConfig.key === column && sortConfig.direction === "asc") {
+  //     direction = "desc";
+  //   }
+  //   setSortConfig({ key: column, direction });
+  // };
 
-  const sortedComments = [...comments].sort((a, b) => {
-    if (sortConfig.key === "No") {
-      return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
-    } else if (sortConfig.key === "User") {
-      return sortConfig.direction === "asc" ? a.author.localeCompare(b.author) : b.author.localeCompare(a.author);
-    } else if (sortConfig.key === "Comment ID") {
-      return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
-    } else if (sortConfig.key === "Comment content") {
-      return sortConfig.direction === "asc" ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text);
-    } else if (sortConfig.key === "Comment at") {
-      return sortConfig.direction === "asc" ? new Date(a.comment_at) - new Date(b.comment_at) : new Date(b.comment_at) - new Date(a.comment_at);
-    } else if (sortConfig.key === "Comment keyword") {
-      return sortConfig.direction === "asc" ? (a.keyword || "").localeCompare(b.keyword || "") : (b.keyword || "").localeCompare(a.keyword || "");
-    } else if (sortConfig.key === "Sentiment") {
-      return sortConfig.direction === "asc" ? a.sentiment.label.localeCompare(b.sentiment.label) : b.sentiment.label.localeCompare(a.sentiment.label);
-    }
-    return 0;
-  });
+  // const sortedComments = [...comments].sort((a, b) => {
+  //   if (sortConfig.key === "No") {
+  //     return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
+  //   } else if (sortConfig.key === "User") {
+  //     return sortConfig.direction === "asc" ? a.author.localeCompare(b.author) : b.author.localeCompare(a.author);
+  //   } else if (sortConfig.key === "Comment ID") {
+  //     return sortConfig.direction === "asc" ? a.id - b.id : b.id - a.id;
+  //   } else if (sortConfig.key === "Comment content") {
+  //     return sortConfig.direction === "asc" ? a.text.localeCompare(b.text) : b.text.localeCompare(a.text);
+  //   } else if (sortConfig.key === "Comment at") {
+  //     return sortConfig.direction === "asc" ? new Date(a.comment_at) - new Date(b.comment_at) : new Date(b.comment_at) - new Date(a.comment_at);
+  //   } else if (sortConfig.key === "Comment keyword") {
+  //     return sortConfig.direction === "asc" ? (a.keyword || "").localeCompare(b.keyword || "") : (b.keyword || "").localeCompare(a.keyword || "");
+  //   } else if (sortConfig.key === "Sentiment") {
+  //     return sortConfig.direction === "asc" ? a.sentiment.label.localeCompare(b.sentiment.label) : b.sentiment.label.localeCompare(a.sentiment.label);
+  //   }
+  //   return 0;
+  // });
 
   const convertCommentsToCSV = (comments) => {
     const headers = ["Index", "Author", "Comment ID", "Text", "Channel", "Comment Date", "Keyword", "Sentiment"];
@@ -347,7 +347,7 @@ function App() {
               Comment Keywords
             </Typography>
             {loading ? (
-              <div className="loading-video">
+              <div className="loading-video" >
                 <CircularProgress />
                 Loading comment keywords...
               </div>
@@ -447,15 +447,15 @@ function App() {
                 </div>
                 <TableContainer>
                   <Table>
-                    <TableHead>
+                  <TableHead>
                       <TableRow>
-                        <TableCell onClick={() => handleSort("No")}>No {sortConfig.key === "No" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("User")}>User {sortConfig.key === "User" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("Comment ID")}>Comment ID {sortConfig.key === "Comment ID" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("Comment content")}>Comment content {sortConfig.key === "Comment content" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("Comment at")}>Comment at {sortConfig.key === "Comment at" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("Comment keyword")}>Comment keyword {sortConfig.key === "Comment keyword" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
-                        <TableCell onClick={() => handleSort("Sentiment")}>Sentiment {sortConfig.key === "Sentiment" && (sortConfig.direction === "asc" ? "▲" : "▼")}</TableCell>
+                        <TableCell>No</TableCell>
+                        <TableCell>User</TableCell>
+                        <TableCell>Comment ID</TableCell>
+                        <TableCell>Comment content</TableCell>
+                        <TableCell>Comment at</TableCell>
+                        <TableCell>Comment keyword</TableCell>
+                        <TableCell>Sentiment</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
