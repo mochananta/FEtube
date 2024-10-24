@@ -44,7 +44,7 @@ function App() {
 
   const loadMoreComments = () => {
     pollJobStatus(jobId, currentPage + 1);
-    setCurrentPage(currentPage + 1); 
+    setCurrentPage(currentPage + 1);
   };
 
   const handleFetchComments = async () => {
@@ -73,20 +73,20 @@ function App() {
       }
 
       const data = await response.json();
+      console.log("Response from comments API:", data); // Log response
+
       const jobId = data.job_id;
 
       if (!jobId) {
         throw new Error("Job ID not found in response.");
       }
 
-      await fetchVideoDetails(jobId);
+      setTimeout(async () => {
+        await fetchVideoDetails(jobId);
+      }, 10000); 
       pollJobStatus(jobId);
     } catch (error) {
-      if (error.message === "Failed to fetch") {
-        setError("Tidak dapat terhubung ke server. Silakan cek koneksi internet atau coba lagi nanti.");
-      } else {
-        setError("Terjadi kesalahan saat mengambil data. Silakan coba lagi!!");
-      }
+      setError(error.message === "Failed to fetch" ? "Tidak dapat terhubung ke server. Silakan cek koneksi internet atau coba lagi nanti." : "Terjadi kesalahan saat mengambil data. Silakan coba lagi!!");
       console.error("Error fetching comments:", error);
       setLoading(false);
     }
@@ -94,52 +94,50 @@ function App() {
 
   const pollJobStatus = async (jobId, page = 1, retries = 20, interval = 10000) => {
     let attempts = 0;
-  
+
     const poll = setInterval(async () => {
       try {
-        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}?page=${page}&limit=100`);
+        const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/result/${jobId}?page=${page}&limit=500`);
         if (response.ok) {
           const result = await response.json();
-          console.log("Polling result:", result);
-  
+          console.log("Polling result:", result); // Log polling result
+
           if (result.detail) {
             console.log(result.detail);
             attempts++;
             if (attempts >= retries) {
-              clearInterval(poll); // Berhenti setelah beberapa percobaan
+              clearInterval(poll);
               setError("Gagal mendapatkan komentar setelah beberapa kali percobaan.");
               setLoading(false);
             }
             return;
           }
-  
-          if (result && Array.isArray(result.comments)) {
+
+          if (Array.isArray(result.comments)) {
             setComments((prevComments) => [...prevComments, ...result.comments]);
             setAllComments((prevComments) => [...prevComments, ...result.comments]);
-            
-            // Update totalComments here with the number of new comments
-            setTotalComments((prevTotal) => prevTotal + result.comments.length);
-  
-            // Perbarui sentimen dan keywords
-            const totalSentiments = calculateSentimentData([...allComments, ...result.comments]);
-            setTotalComments(totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative); // Update totalComments
-  
+
+            const totalSentiments = calculateSentimentData([...result.comments]);
+            setTotalComments((prevTotal) => prevTotal + totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative);
+
             fetchCommentKeywords(jobId);
-  
-            if (result.comments.length < 60) {
-              clearInterval(poll); // Hentikan polling jika batch terakhir kurang dari limit (60)
+
+            if (result.comments.length < 200) {
+              clearInterval(poll);
               setLoading(false);
             } else {
-              setTimeout(() => pollJobStatus(jobId, page + 1), interval); // Ambil batch berikutnya
+              page++;
             }
           } else {
             throw new Error("Comments not found in result.");
           }
-  
-        } else if (attempts >= retries) {
-          clearInterval(poll);
-          setError("Gagal mendapatkan komentar setelah beberapa kali percobaan.");
-          setLoading(false);
+        } else {
+          console.error("Polling failed with status:", response.status);
+          if (attempts >= retries) {
+            clearInterval(poll);
+            setError("Gagal mendapatkan komentar setelah beberapa kali percobaan.");
+            setLoading(false);
+          }
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -153,10 +151,12 @@ function App() {
   const fetchVideoDetails = async (jobId) => {
     try {
       const response = await fetch(`http://207.148.117.200:8000/api/youtube/video/${jobId}`);
+      console.log(`Fetching video details for job ID: ${jobId}`); // Log job ID
       if (!response.ok) {
         throw new Error("Failed to fetch video details.");
       }
       const data = await response.json();
+      console.log("Response from video details API:", data); // Log response
       setFetchedVideoDetails(data);
     } catch (error) {
       console.error("Error fetching video details:", error);
@@ -167,14 +167,14 @@ function App() {
   const fetchCommentKeywords = async (jobId) => {
     try {
       const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/keywords/${jobId}`);
-  
+
       if (!response.ok) {
         throw new Error("Failed to fetch comment keywords");
       }
-  
+
       const data = await response.json();
       if (data.keyword_analysis) {
-        setKeywords(prevKeywords => [...prevKeywords, ...data.keyword_analysis]); 
+        setKeywords((prevKeywords) => [...prevKeywords, ...data.keyword_analysis]);
       } else {
         throw new Error("Keyword analysis not found in response");
       }
@@ -189,15 +189,15 @@ function App() {
       Neutral: 0,
       Negative: 0,
     };
-  
+
     comments.forEach((comment) => {
       const sentimentLabel = comment.sentiment_label;
-  
+
       if (sentimentCounts[sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1)] !== undefined) {
         sentimentCounts[sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1)]++;
       }
     });
-  
+
     setSentimentData({
       labels: ["Positive", "Neutral", "Negative"],
       datasets: [
@@ -207,10 +207,10 @@ function App() {
         },
       ],
     });
-  
+
     return sentimentCounts;
   };
-  
+
   useEffect(() => {
     const totalSentiments = calculateSentimentData(comments);
     setTotalComments(totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative); // Update totalComments
@@ -325,7 +325,7 @@ function App() {
                     {fetchedVideoDetails.video_details.uploader.verified && (
                       <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified Badge" style={{ width: "16px", height: "16px", margin: "7px" }} />
                     )}
-                    | {fetchedVideoDetails.video_details.uploader.subscriber_count.toLocaleString()} Subscribers
+                    | {fetchedVideoDetails.video_details.uploader.subscriber_count}
                   </Typography>
                 </div>
               </>
