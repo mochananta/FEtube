@@ -5,8 +5,8 @@ import { Pie } from "react-chartjs-2";
 import DownloadIcon from "@mui/icons-material/Download";
 import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
-// import MenuItem from "@mui/material/MenuItem";
-// import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import "./App.css";
 
 Chart.register(...registerables);
@@ -23,13 +23,17 @@ function App() {
   const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [jobId, setJobId] = useState(null);
-  // const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
+  const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
   const commentsPerPage = 5;
   const totalPages = Math.ceil(comments.length / commentsPerPage);
   const indexOfLastComment = currentPage * commentsPerPage;
   const indexOfFirstComment = indexOfLastComment - commentsPerPage;
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
+  };
+
+  const handleSentimentChange = (e) => {
+    setSelectedSentiment(e.target.value);
   };
 
   const [sentimentData, setSentimentData] = useState({
@@ -83,7 +87,7 @@ function App() {
 
       setTimeout(async () => {
         await fetchVideoDetails(jobId);
-      }, 10000); 
+      }, 10000);
       pollJobStatus(jobId);
     } catch (error) {
       setError(error.message === "Failed to fetch" ? "Tidak dapat terhubung ke server. Silakan cek koneksi internet atau coba lagi nanti." : "Terjadi kesalahan saat mengambil data. Silakan coba lagi!!");
@@ -246,9 +250,8 @@ function App() {
 
   const filteredComments = comments.filter((comment) => {
     const matchesSearchTerm = comment.text && comment.text.toLowerCase().includes(searchTerm.toLowerCase());
-    // const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment.label.toLowerCase() === selectedSentiment.toLowerCase();
-    return matchesSearchTerm;
-    // matchesSentiment
+    const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment_label.toLowerCase() === selectedSentiment.toLowerCase();
+    return matchesSearchTerm && matchesSentiment;
   });
 
   const formatDate = (dateString) => {
@@ -284,7 +287,7 @@ function App() {
         </Grid>
         <Grid item xs={12}>
           <Button fullWidth variant="contained" style={{ backgroundColor: "#CC0000", color: "white", fontWeight: "bold", fontSize: "16px", padding: "10px" }} onClick={handleFetchComments} disabled={loading}>
-            <img src="./vector.png" alt="Extract Icon" style={{ width: "25px", height: "25px", marginRight: "13px" }} />
+            <img src="./Vector.png" alt="Extract Icon" style={{ width: "25px", height: "25px", marginRight: "13px" }} />
             {loading ? "Memuat..." : "EXTRACT COMMENTS"}
           </Button>
           {error && <div style={{ color: "red", textAlign: "center", marginTop: "10px" }}>{error}</div>}
@@ -373,7 +376,7 @@ function App() {
             <div className="sentiment-container">
               {/* Pie chart */}
               <div className="sentiment-chart">
-                {sentimentData.datasets[0].data.some((value) => value > 0) ? ( // Memeriksa apakah ada nilai positif
+                {sentimentData.datasets[0].data.some((value) => value > 0) ? ( 
                   <Pie data={sentimentData} />
                 ) : (
                   <Typography variant="body2" style={{ textAlign: "center" }}>
@@ -416,7 +419,7 @@ function App() {
             Extracted Comment <i style={{ color: "#CC0000" }}>({totalComments})</i>
           </Typography>
           <div elevation={3} className="comment-table-paper" style={{ marginTop: "20px", marginBottom: "20px", padding: "20px" }}>
-            {loading ? ( // Tambahkan kondisi loading
+            {loading ? ( 
               <div className="loading-comments">
                 <CircularProgress />
                 Loading comments...
@@ -439,12 +442,12 @@ function App() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  {/* <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={(e) => setSelectedSentiment(e.target.value)}>
+                  <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={handleSentimentChange}>
                     <MenuItem value="All sentiment">All sentiment</MenuItem>
-                    <MenuItem value="Positive">Positive</MenuItem>
-                    <MenuItem value="Neutral">Neutral</MenuItem>
-                    <MenuItem value="Negative">Negative</MenuItem>
-                  </Select> */}
+                    <MenuItem value="positive">Positive</MenuItem>
+                    <MenuItem value="neutral">Neutral</MenuItem>
+                    <MenuItem value="negative">Negative</MenuItem>
+                  </Select>
                   <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
                     <DownloadIcon />
                   </Button>
@@ -509,7 +512,7 @@ function App() {
                       ) : (
                         <TableRow>
                           <TableCell colSpan={7} align="center" style={{ fontStyle: "italic" }}>
-                            Tidak ada komentar
+                            No comment
                           </TableCell>
                         </TableRow>
                       )}
