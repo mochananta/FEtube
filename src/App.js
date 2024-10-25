@@ -77,7 +77,7 @@ function App() {
       }
 
       const data = await response.json();
-      console.log("Response from comments API:", data); // Log response
+      console.log("Response from comments API:", data);
 
       const jobId = data.job_id;
 
@@ -227,7 +227,7 @@ function App() {
       comment.author,
       comment.comment_id || comment.id,
       comment.text.replace(/"/g, '""'),
-      comment.comment_at,
+      comment.time_formatted,
       comment.keywords.length > 0 ? comment.keywords.join(", ") : "N/A",
       comment.sentiment ? comment.sentiment.label.charAt(0).toUpperCase() + comment.sentiment.label.slice(1) : "Unknown", // Cek apakah sentiment ada
     ]);
@@ -254,18 +254,6 @@ function App() {
     return matchesSearchTerm && matchesSentiment;
   });
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-  };
-
   const commentsToDisplay = filteredComments.slice(indexOfFirstComment, indexOfLastComment);
 
   return (
@@ -283,7 +271,7 @@ function App() {
 
         {/* Form Input API Key dan YouTube URL */}
         <Grid item xs={12} md={6}>
-          <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} style={{ marginBottom: "10px" }} />
+          <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} style={{ width: "203%", marginRight: "13px" }} />
         </Grid>
         <Grid item xs={12}>
           <Button fullWidth variant="contained" style={{ backgroundColor: "#CC0000", color: "white", fontWeight: "bold", fontSize: "16px", padding: "10px" }} onClick={handleFetchComments} disabled={loading}>
@@ -376,7 +364,7 @@ function App() {
             <div className="sentiment-container">
               {/* Pie chart */}
               <div className="sentiment-chart">
-                {sentimentData.datasets[0].data.some((value) => value > 0) ? ( 
+                {sentimentData.datasets[0].data.some((value) => value > 0) ? (
                   <Pie data={sentimentData} />
                 ) : (
                   <Typography variant="body2" style={{ textAlign: "center" }}>
@@ -419,7 +407,7 @@ function App() {
             Extracted Comment <i style={{ color: "#CC0000" }}>({totalComments})</i>
           </Typography>
           <div elevation={3} className="comment-table-paper" style={{ marginTop: "20px", marginBottom: "20px", padding: "20px" }}>
-            {loading ? ( 
+            {loading ? (
               <div className="loading-comments">
                 <CircularProgress />
                 Loading comments...
@@ -475,9 +463,9 @@ function App() {
                               <span style={{ color: "#3EA6FF" }}>{comment.comment_id}</span>
                             </TableCell>
                             <TableCell>{comment.text}</TableCell>
-                            <TableCell>{formatDate(comment.comment_at)}</TableCell>
+                            <TableCell>{(comment.time_formatted)}</TableCell>
                             <TableCell>
-                              {comment.keywords.map((keyword, index) => (
+                              {(Array.isArray(comment.keywords) ? comment.keywords : []).map((keyword, index) => (
                                 <span
                                   key={index}
                                   style={{
@@ -511,8 +499,8 @@ function App() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={7} align="center" style={{ fontStyle: "italic" }}>
-                            No comment
+                          <TableCell colSpan={7} align="center">
+                            No comments available
                           </TableCell>
                         </TableRow>
                       )}
