@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Chart, registerables } from "chart.js";
 import { TextField, Button, Grid, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, InputAdornment } from "@mui/material";
-import { Pie } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 import DownloadIcon from "@mui/icons-material/Download";
 import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
@@ -118,6 +118,7 @@ function App() {
           }
 
           if (Array.isArray(result.comments)) {
+            console.log("Comments received in pollJobStatus:", result.comments); // Log comments yang diterima
             setComments((prevComments) => [...prevComments, ...result.comments]);
             setAllComments((prevComments) => [...prevComments, ...result.comments]);
 
@@ -126,7 +127,7 @@ function App() {
 
             fetchCommentKeywords(jobId);
 
-            if (result.comments.length < 200) {
+            if (result.comments.length < 500) {
               clearInterval(poll);
               setLoading(false);
             } else {
@@ -261,12 +262,12 @@ function App() {
       <Grid container spacing={3} className="main-container">
         <Grid item xs={12} style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", padding: "10px" }}>
-            <img src="./image.png" alt="YouTube Logo" style={{ width: "30px", height: "30px", marginRight: "10px" }} />
+            <img src="./tube.gif" alt="YouTube Logo" style={{ width: "45px", height: "auto", marginRight: "10px" }} />
             <Typography variant="h5" style={{ fontWeight: "bold", fontFamily: "Title Large/Font" }}>
               CommentTube
             </Typography>
           </div>
-          <hr style={{ width: "100%", border: "1px solid #E4E0E0FF", marginTop: "5px", marginBottom: "10px" }} />
+          <hr style={{ width: "100%", border: "1px solid #E4E0E0FF", marginTop: "1px", marginBottom: "10px" }} />
         </Grid>
 
         {/* Form Input API Key dan YouTube URL */}
@@ -321,7 +322,38 @@ function App() {
                 </div>
               </>
             ) : (
-              <div className="loading-video">Loading video details...</div>
+              <div>
+                {loading ? (
+                  <div style={{ display: "flex", alignItems: "flex-start" }}>
+                    <div style={{ backgroundColor: "#e0e0e0", width: "600px", height: "200px", marginRight: "20px", borderRadius: "8px" }} />
+                    <div style={{ flexGrow: 1 }}>
+                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "80%", marginBottom: "10px", borderRadius: "4px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px" }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ display: "flex", alignItems: "flex-start" }}>
+                      <div style={{ backgroundColor: "#e0e0e0", width: "600px", height: "200px", marginRight: "20px", borderRadius: "8px" }} />
+                      <div style={{ flexGrow: 1 }}>
+                        <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "80%", marginBottom: "10px", borderRadius: "4px" }} />
+                        <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
+                        <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
+                        <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px" }} />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", marginTop: "15px" }}>
+                      <div style={{ backgroundColor: "#e0e0e0", width: "30px", height: "30px", borderRadius: "50%", marginRight: "10px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "40%", borderRadius: "4px" }} />
+                    </div>
+                    <Typography variant="body1" style={{ textAlign: "center", marginTop: "15px" }}>
+                      No video available
+                    </Typography>
+                  </div>
+                )}
+              </div>
             )}
           </Paper>
         </div>
@@ -332,9 +364,11 @@ function App() {
               Comment Keywords
             </Typography>
             {loading ? (
-              <div className="loading-video">
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "20px" }}>
                 <CircularProgress />
-                Loading comment keywords...
+                <Typography variant="body1" style={{ marginTop: "10px" }}>
+                  Loading comment keywords...
+                </Typography>
               </div>
             ) : keywords.length > 0 ? (
               <div className="comment-keyword-container">
@@ -343,9 +377,20 @@ function App() {
                 ))}
               </div>
             ) : (
-              <Typography variant="body2" color="textSecondary">
-                No keywords found for the comments.
-              </Typography>
+              <div>
+                <div style={{ display: "flex", alignItems: "flex-start" }}>
+                  <div style={{ flexGrow: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
+                    </div>
+                  </div>
+                </div>
+                <Typography variant="body2" color="textSecondary" style={{ textAlign: "center", marginTop: "15px" }}>
+                  No keywords found for the comments.
+                </Typography>
+              </div>
             )}
           </div>
         </Grid>
@@ -356,45 +401,60 @@ function App() {
           </Typography>
 
           {loading ? (
-            <div className="loading-sentiment">
+            <div style={{ textAlign: "center", padding: "20px" }}>
               <CircularProgress />
-              Loading sentiment analytic...
+              <Typography variant="body1" style={{ marginTop: "10px" }}>
+                Loading sentiment analytic...
+              </Typography>
             </div>
           ) : (
-            <div className="sentiment-container">
-              {/* Pie chart */}
-              <div className="sentiment-chart">
-                {sentimentData.datasets[0].data.some((value) => value > 0) ? (
-                  <Pie data={sentimentData} />
-                ) : (
-                  <Typography variant="body2" style={{ textAlign: "center" }}>
-                    No sentiment data available.
-                  </Typography>
-                )}
-              </div>
+            <div>
+              <div className="sentiment-container">
+                <div className="sentiment-chart">
+                  {sentimentData.datasets[0].data.some((value) => value > 0) ? (
+                    <>
+                      <Doughnut
+                        data={sentimentData}
+                        options={{
+                          cutout: "70%", // Persentase ini mengatur seberapa besar lubang di tengah
+                        }}
+                      />
+                      <div className="sentiment-chart-text">
+                        {totalComments} <br /> Sentiment
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ textAlign: "center", padding: "20px" }}>
+                      <div style={{ backgroundColor: "#e0e0e0", height: "200px", width: "100%", borderRadius: "20px", marginBottom: "10px" }} />
+                      <Typography variant="body2" style={{ textAlign: "center" }}>
+                        No sentiment data available.
+                      </Typography>
+                    </div>
+                  )}
+                </div>
 
-              {/* Deskripsi Analitik Sentimen */}
-              <div className="sentiment-details">
-                <Typography variant="body2" className="sentiment-total" style={{ fontWeight: "bold", marginBottom: "5px" }}>
-                  {totalComments} Sentiments
-                </Typography>
-                <div className="sentiment-item">
-                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
-                  <span>
-                    Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div className="sentiment-item">
-                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
-                  <span>
-                    Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
-                  </span>
-                </div>
-                <div className="sentiment-item">
-                  <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
-                  <span>
-                    Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
-                  </span>
+                <div className="sentiment-details">
+                  <Typography variant="body2" className="sentiment-total" style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                    {totalComments} Sentiments
+                  </Typography>
+                  <div className="sentiment-item">
+                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
+                    <span>
+                      Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div className="sentiment-item">
+                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
+                    <span>
+                      Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                  <div className="sentiment-item">
+                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
+                    <span>
+                      Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -440,16 +500,16 @@ function App() {
                     <DownloadIcon />
                   </Button>
                 </div>
-                <TableContainer>
-                  <Table>
+                <TableContainer style={{ maxHeight: "100%", overflow: "auto" }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell>No</TableCell>
                         <TableCell>User</TableCell>
                         <TableCell>Comment ID</TableCell>
-                        <TableCell>Comment content</TableCell>
-                        <TableCell>Comment at</TableCell>
-                        <TableCell>Comment keyword</TableCell>
+                        <TableCell>Comment Content</TableCell>
+                        <TableCell>Comment At</TableCell>
+                        <TableCell>Comment Keywords</TableCell>
                         <TableCell>Sentiment</TableCell>
                       </TableRow>
                     </TableHead>
@@ -463,24 +523,26 @@ function App() {
                               <span style={{ color: "#3EA6FF" }}>{comment.comment_id}</span>
                             </TableCell>
                             <TableCell>{comment.text}</TableCell>
-                            <TableCell>{(comment.time_formatted)}</TableCell>
+                            <TableCell>{comment.time_formatted}</TableCell>
                             <TableCell>
-                              {(Array.isArray(comment.keywords) ? comment.keywords : []).map((keyword, index) => (
-                                <span
-                                  key={index}
-                                  style={{
-                                    padding: "5px 10px",
-                                    border: "1px solid #000000FF",
-                                    color: "#000000FF",
-                                    borderRadius: "20px",
-                                    margin: "5px",
-                                    display: "inline-block",
-                                    fontSize: "12px",
-                                  }}
-                                >
-                                  {keyword}
-                                </span>
-                              ))}
+                              {comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0
+                                ? comment.keywords.map((keyword, idx) => (
+                                    <span
+                                      key={idx}
+                                      style={{
+                                        padding: "5px 10px",
+                                        border: "1px solid #000000FF",
+                                        color: "#000000FF",
+                                        borderRadius: "20px",
+                                        margin: "5px",
+                                        display: "inline-block",
+                                        fontSize: "12px",
+                                      }}
+                                    >
+                                      {keyword}
+                                    </span>
+                                  ))
+                                : "N/A"}
                             </TableCell>
                             <TableCell>
                               <span
@@ -507,6 +569,7 @@ function App() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+
                 {/* Pagination */}
                 <Grid item xs={12}>
                   {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" style={{ marginTop: "20px", display: "flex", justifyContent: "center" }} />}
