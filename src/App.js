@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import "./App.css";
 
 Chart.register(...registerables);
@@ -336,7 +337,7 @@ function App() {
                 ) : (
                   <div>
                     <div style={{ display: "flex", alignItems: "flex-start" }}>
-                      <div style={{ backgroundColor: "#e0e0e0", width: "600px", height: "200px", marginRight: "20px", borderRadius: "8px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", width: "650px", height: "200px", marginRight: "20px", borderRadius: "8px" }} />
                       <div style={{ flexGrow: 1 }}>
                         <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "80%", marginBottom: "10px", borderRadius: "4px" }} />
                         <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
@@ -416,7 +417,7 @@ function App() {
                       <Doughnut
                         data={sentimentData}
                         options={{
-                          cutout: "70%", // Persentase ini mengatur seberapa besar lubang di tengah
+                          cutout: "70%",
                         }}
                       />
                       <div className="sentiment-chart-text">
@@ -425,7 +426,7 @@ function App() {
                     </>
                   ) : (
                     <div style={{ textAlign: "center", padding: "20px" }}>
-                      <div style={{ backgroundColor: "#e0e0e0", height: "200px", width: "100%", borderRadius: "20px", marginBottom: "10px" }} />
+                      <div style={{ backgroundColor: "#e0e0e0", height: "170px", width: "100%", borderRadius: "100px", marginBottom: "10px" }} />
                       <Typography variant="body2" style={{ textAlign: "center" }}>
                         No sentiment data available.
                       </Typography>
@@ -434,24 +435,24 @@ function App() {
                 </div>
 
                 <div className="sentiment-details">
-                  <Typography variant="body2" className="sentiment-total" style={{ fontWeight: "bold", marginBottom: "5px" }}>
-                    {totalComments} Sentiments
-                  </Typography>
-                  <div className="sentiment-item">
+                  <div className="sentiment-item" style={{ marginBottom: "15px" }}>
                     <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
-                    <span>
+                    <span style={{ fontWeight: 400 }}>
+                      {" "}
                       Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
                     </span>
                   </div>
-                  <div className="sentiment-item">
+                  <div className="sentiment-item" style={{ marginBottom: "15px" }}>
                     <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
-                    <span>
+                    <span style={{ fontWeight: 400 }}>
+                      {" "}
                       Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
                     </span>
                   </div>
                   <div className="sentiment-item">
                     <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
-                    <span>
+                    <span style={{ fontWeight: 400 }}>
+                      {" "}
                       Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
                     </span>
                   </div>
@@ -490,16 +491,22 @@ function App() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={handleSentimentChange}>
-                    <MenuItem value="All sentiment">All sentiment</MenuItem>
-                    <MenuItem value="positive">Positive</MenuItem>
-                    <MenuItem value="neutral">Neutral</MenuItem>
-                    <MenuItem value="negative">Negative</MenuItem>
-                  </Select>
+
+                  <div style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
+                    <CalendarMonthIcon style={{ marginRight: "7px", color: "#888" }} />
+                    <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={handleSentimentChange}>
+                      <MenuItem value="All sentiment">All sentiment</MenuItem>
+                      <MenuItem value="positive">Positive</MenuItem>
+                      <MenuItem value="neutral">Neutral</MenuItem>
+                      <MenuItem value="negative">Negative</MenuItem>
+                    </Select>
+                  </div>
+
                   <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
                     <DownloadIcon />
                   </Button>
                 </div>
+
                 <TableContainer style={{ maxHeight: "100%", overflow: "auto" }}>
                   <Table stickyHeader>
                     <TableHead>
@@ -507,9 +514,9 @@ function App() {
                         <TableCell>No</TableCell>
                         <TableCell>User</TableCell>
                         <TableCell>Comment ID</TableCell>
-                        <TableCell>Comment Content</TableCell>
-                        <TableCell>Comment At</TableCell>
-                        <TableCell>Comment Keywords</TableCell>
+                        <TableCell>Comment content</TableCell>
+                        <TableCell>Comment at</TableCell>
+                        <TableCell>Comment keyword</TableCell>
                         <TableCell>Sentiment</TableCell>
                       </TableRow>
                     </TableHead>
