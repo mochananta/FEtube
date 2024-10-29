@@ -8,6 +8,18 @@ body {
   padding: 20px;
 }
 
+.commentTubeHeader {
+ display: flex;
+ align-items: center;
+ padding: 10px;
+}
+
+.commentTubeLogo {
+  width: 45px;
+  height: auto;
+  margin-right: 10px ;
+}
+
 .loading-video {
   display: flex;
   align-items: center;
@@ -125,16 +137,6 @@ body {
   height: 40px;
   animation: spin 1s linear infinite;
 }
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 
 .sentiment-paper {
   margin-top: 20px;
@@ -258,5 +260,162 @@ h5, h6 {
 .pagination {
   display: flex;
   justify-content: flex-end;
+}
+
+.hidden-date-picker input {
+  display: none; 
+}
+
+.date-picker-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.date-picker-input {
+  z-index: 9999;
+}
+
+.date-picker-popper {
+  z-index: 9999; 
+}
+
+.polling-status {
+  color: red;
+  font-style: italic;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+  .video-detail {
+    margin: 20px;
+  }
+
+  .sentiment-chart {
+    max-width: 200px;
+  }
+
+  .comment-table-paper {
+    margin-top: 15px;
+  }
+
+  .video-title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 992px) {
+  .loading-spinner {
+    width: 40px; 
+    height: 40px; 
+  }
+
+  .video-description {
+    font-size: 13px;
+  }
+
+  .comment-keyword-container {
+    justify-content: center;
+  }
+
+  .sentiment-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sentiment-chart {
+    margin-right: 0;
+    margin-bottom: 20px;
+    max-width: 100%;
+  }
+
+  .comment-chip {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding: 10px;
+  }
+
+  .video-detail {
+    margin: 10px;
+  }
+
+  .video-title {
+    font-size: 16px;
+  }
+
+  .video-description {
+    font-size: 12px;
+  }
+
+  .comment-keyword-paper,
+  .sentiment-paper {
+    padding: 10px;
+  }
+
+  .comment-table-paper {
+    padding: 15px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .spinner-overlay {
+    padding: 10px;
+  }
+
+  .comment-chip {
+    font-size: 12px; 
+    padding: 8px 12px; 
+  }
+}
+
+@media (max-width: 576px) {
+  .video-title {
+    font-size: 14px;
+  }
+
+  .video-description {
+    font-size: 11px;
+  }
+
+  .video-channel {
+    font-size: 12px;
+  }
+
+  .sentiment-chart-text {
+    font-size: 16px;
+  }
+
+  .comment-table-paper {
+    padding: 10px;
+  }
+
+  .comment-table-paper th,
+  .comment-table-paper td {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .button {
+    padding: 8px;
+  }
+
+  .custom-select {
+    min-width: 40px;
+  }
 }
 
