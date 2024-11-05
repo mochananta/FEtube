@@ -37,7 +37,7 @@ body {
 }
 
 .youtubeInput {
-  width: 1266px !important;
+  width: 100% !important;
   margin-right: 13px;
 }
 
@@ -71,7 +71,7 @@ body {
 }
 
 .divider {
-  width: 100%;
+  width: 100% !important;
   border: 1px solid #E4E0E0FF;
   margin-top: 40px;
   margin-bottom: 10px;
@@ -84,7 +84,7 @@ body {
 .videoDetail {
   padding: 10px;
   margin: 20px;
-  width: 1254px;
+  width: 100% !important;
 }
 
 .videoDetailContent {
@@ -153,7 +153,7 @@ body {
 
 .skeletonThumbnail {
   background-color: #e0e0e0;
-  width: 650px;
+  width: 100% !important;
   height: 200px;
   margin-right: 20px;
   border-radius: 8px;
@@ -371,7 +371,7 @@ body {
 .sentimentChart {
   position: relative;
   flex: 1;
-  max-width: 200px;
+  max-width: 100% !important;
   margin-right: 20px;
   justify-content: center;
 }
@@ -529,7 +529,7 @@ h5, h6 {
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px 12px;
-  width: 1202px;
+  width: 100% !important;
   gap: 12px;
   background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
