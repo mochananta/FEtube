@@ -1,0 +1,175 @@
+@media (max-width: 1200px) {
+    .commentTablePaper {
+      padding: 15px; /* Adjust padding for smaller screens */
+    }
+  
+    .searchContainer {
+      width: 100%; /* Full width on smaller screens */
+    }
+  
+    .searchContainer:hover {
+      box-shadow: none; /* Remove shadow effect on hover for smaller screens */
+    }
+  
+    .comment-table-paper th,
+    .comment-table-paper td {
+      padding: 8px; /* Reduce padding for smaller screens */
+    }
+  
+    .totalCommentsCount {
+      font-size: 24px; /* Adjust font size for better readability */
+    }
+  
+    .extractedCommentTitle {
+      font-size: 18px; /* Adjust font size for better readability */
+    }
+  
+    .calendarIcon,
+    .downloadIcon {
+      width: 20px; /* Smaller icons for better fitting */
+      height: 20px; 
+    }
+
+    .pagination-info {
+        margin-left: 0; /* Reset margin on smaller screens */
+        text-align: center; /* Center align text */
+      }
+    
+      .pagination {
+        margin-top: 20px; /* Adjust margin for smaller screens */
+      }
+    
+      .pagination-select {
+        width: 50px; /* Smaller width for select */
+      }
+    
+      .keywordBadge {
+        font-size: 12px; /* Adjust font size for badges */
+      }
+  }
+  
+  @media (max-width: 768px) {
+    .datePickerContainer {
+      left: 50%; 
+      transform: translateX(-50%); 
+    }
+
+    .tableContainer {
+        margin-top: 15px;
+      }
+    
+      .MuiTableCell-root {
+        font-size: 12px !important; 
+      }
+    
+      .pagination {
+        flex-direction: column; 
+        margin-left: 0; 
+        margin-right: 0;
+      }
+    
+      .pagination-count,
+      .pagination-select {
+        margin: 5px 0; 
+      }
+  }
+
+@media (max-width: 1075px) {
+    .youtubeInput {
+      width: 100% !important;
+    }
+  
+    .videoDetail {
+      width: auto;
+    }
+  
+    .videoThumbnail {
+      width: 100%;
+    }
+  
+    .videoDetailContainer, .videoSkeleton {
+      margin: 0 10px;
+    }
+  
+    .videoTitle, .video-description, .channel-name {
+      font-size: 16px;
+    }
+
+    .skeletonThumbnail {
+        width: 100%; 
+        height: auto; 
+      }
+    
+      .skeletonContent {
+        flex-direction: column; 
+      }
+    
+      .skeletonInfo {
+        width: 100%; 
+      }
+
+      .commentKeywordPaper {
+        max-width: 100%; 
+        padding: 5px; 
+      }
+    
+      .commentChip {
+        font-size: 12px; 
+      }
+    
+      .skeletonBox {
+        width: 45%; 
+        margin-bottom: 10px; 
+      }
+    
+      .noKeywordContainer {
+        margin-right: 0; 
+      }
+
+      .sentimentPaper {
+        padding: 15px; 
+      }
+    
+      .sentimentContainer {
+        flex-direction: column; 
+        align-items: flex-start; 
+      }
+    
+      .sentimentChart {
+        max-width: 100%; 
+        margin-right: 0; 
+        margin-bottom: 15px; 
+      }
+    
+      .totalComments {
+        font-size: 24px; /* Adjust font size for better readability */
+      }
+    
+      .sentimentText {
+        font-size: 12px; /* Slightly smaller font size for better fitting */
+      }
+  }
+  
+  @media (max-height: 557px) {
+    .main-container {
+      padding: 10px;
+    }
+  
+    .extractButton {
+      font-size: 14px;
+      padding: 8px;
+    }
+  
+    .commentTubeTitle {
+      font-size: 20px !important;
+    }
+  
+    .video-description-container {
+      max-height: 100px; 
+    }
+  
+    .loading-spinner {
+      width: 40px; 
+      height: 40px; 
+    }
+  }

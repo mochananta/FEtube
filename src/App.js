@@ -1,15 +1,16 @@
-import { TextField, Button, Grid, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination, InputAdornment } from "@mui/material";
+import { TextField, Button, Grid, Paper, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination } from "@mui/material";
 import React, { useState, useEffect, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Chart, registerables } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 import CircularProgress from "@mui/material/CircularProgress";
-import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import DownloadIcon from "@mui/icons-material/Download";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./App.css";
+import "./reponsive.css";
 
 Chart.register(...registerables);
 
@@ -18,6 +19,7 @@ function App() {
   const [isPolling, setIsPolling] = useState(false);
   const datePickerRef = useRef(null);
   const [comments, setComments] = useState([]);
+  const [showSentiment, setShowSentiment] = useState(false);
   const [loading, setLoading] = useState(false);
   const [allComments, setAllComments] = useState([]);
   const [error, setError] = useState("");
@@ -29,6 +31,8 @@ function App() {
   const [jobId] = useState(null);
   const [selectedSentiment, setSelectedSentiment] = useState("All sentiment");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: "text", direction: "ascending" });
   const commentsPerPage = 5;
   const totalPages = Math.ceil(comments.length / commentsPerPage);
   const indexOfLastComment = currentPage * commentsPerPage;
@@ -46,7 +50,32 @@ function App() {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    setIsDatePickerVisible(false);
   };
+
+  const toggleDatePicker = () => {
+    setIsDatePickerVisible(!isDatePickerVisible);
+  };
+
+  const handleClickOutside = (event) => {
+    if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+      setIsDatePickerVisible(false);
+      setSelectedDate(null);
+      setComments(allComments);
+    }
+  };
+
+  useEffect(() => {
+    if (isDatePickerVisible) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDatePickerVisible]);
 
   const handleSentimentChange = (e) => {
     setSelectedSentiment(e.target.value);
@@ -73,6 +102,7 @@ function App() {
     setError("");
     setTotalComments(0);
     setAllComments([]);
+    setShowSentiment(true);
 
     try {
       const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments`, {
@@ -100,6 +130,8 @@ function App() {
       if (!jobId) {
         throw new Error("Job ID not found in response.");
       }
+
+      await fetchCommentKeywords(jobId);
 
       setTimeout(async () => {
         await fetchVideoDetails(jobId);
@@ -196,14 +228,11 @@ function App() {
   const fetchCommentKeywords = async (jobId) => {
     try {
       const response = await fetch(`http://207.148.117.200:8000/api/youtube/comments/keywords/${jobId}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch comment keywords");
-      }
+      if (!response.ok) throw new Error("Failed to fetch comment keywords");
 
       const data = await response.json();
       if (data.keyword_analysis) {
-        setKeywords((prevKeywords) => [...prevKeywords, ...data.keyword_analysis]);
+        setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...data.keyword_analysis])]);
       } else {
         throw new Error("Keyword analysis not found in response");
       }
@@ -246,22 +275,32 @@ function App() {
   }, [comments]);
 
   const convertCommentsToCSV = (comments) => {
-    const headers = ["No", "Author", "Comment ID", "Text", "Comment Date", "Keywords", "Sentiment"];
-    const rows = comments.map((comment, index) => [
-      index + 1,
-      comment.author,
-      comment.comment_id || comment.id,
-      comment.text.replace(/"/g, '""'),
-      comment.time_formatted,
-      comment.keywords && Array.isArray(comment.keywords.keyword_analysis) && comment.keywords.keyword_analysis.length > 0 ? comment.keywords.keyword_analysis.join(", ") : "N/A",
-      comment.sentiment_label ? comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1) : "Unknown",
-    ]);
+    const header = "No,User,Comment ID,Comment content,Comment at,Comment keyword,Sentiment\n";
 
-    return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    const rows = comments.map((comment, index) => {
+      const no = index + 1;
+      const user = comment.author ? comment.author.replace(/"/g, '""').replace(/[\n\r]+/g, " ") : "N/A"; // Menghindari tanda kutip dan newline
+      const commentId = comment.comment_id ? comment.comment_id.replace(/"/g, '""') : "N/A";
+      const content = comment.text ? comment.text.replace(/"/g, '""').replace(/[\n\r]+/g, " ") : "N/A"; // Menghindari newline
+      const commentAt = comment.time_formatted ? comment.time_formatted.replace(/"/g, '""') : "N/A";
+      const keywords =
+        comment.keywords && Array.isArray(comment.keywords)
+          ? comment.keywords
+              .join("; ")
+              .replace(/"/g, '""')
+              .replace(/[\n\r]+/g, " ")
+          : "N/A";
+      const sentiment = comment.sentiment_label ? comment.sentiment_label.replace(/"/g, '""') : "N/A";
+
+      return `${no},"${user}","${commentId}","${content}","${commentAt}","${keywords}","${sentiment}"`; // Menambahkan tanda kutip
+    });
+
+    return header + rows.join("\n");
   };
 
   const downloadCSV = () => {
-    const csvContent = convertCommentsToCSV(allComments);
+    const dataToDownload = filteredComments.length > 0 ? filteredComments : allComments;
+    const csvContent = convertCommentsToCSV(dataToDownload);
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -281,6 +320,19 @@ function App() {
 
   const selectedDateFormatted = selectedDate ? new Date(selectedDate).toLocaleDateString("en-GB") : null;
 
+  const sortedComments = (comments) => {
+    return [...comments].sort((a, b) => {
+      const isAsc = sortConfig.direction === "ascending";
+      if (a[sortConfig.key] < b[sortConfig.key]) {
+        return isAsc ? -1 : 1;
+      }
+      if (a[sortConfig.key] > b[sortConfig.key]) {
+        return isAsc ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
   const filteredComments = comments.filter((comment) => {
     const commentDate = comment.time_formatted ? comment.time_formatted.split(" ")[0] : null; // Extract dd/MM/yyyy part if available
     const matchesDate = !selectedDateFormatted || commentDate === selectedDateFormatted;
@@ -290,52 +342,67 @@ function App() {
 
     return matchesDate && matchesSearchTerm && matchesSentiment;
   });
+
   const commentsToDisplay = filteredComments.slice(indexOfFirstComment, indexOfLastComment);
+  const sortedCommentsToDisplay = sortedComments(commentsToDisplay);
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getIndicator = (key) => {
+    if (sortConfig.key === key) {
+      return sortConfig.direction === "ascending" ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />;
+    }
+    return null;
+  };
 
   return (
     <>
       <Grid container spacing={3} className="main-container">
-        <Grid item xs={12} style={{ marginBottom: "20px" }}>
+        <Grid item xs={12} className="commentTubeContainer">
           <div className="commentTubeHeader">
             <img src="./image.png" alt="YouTube Logo" className="commentTubeLogo" />
-            <Typography variant="h5" style={{ fontWeight: "500", fontFamily: "Title Large/Font"}}>
+            <Typography variant="h5" className="commentTubeTitle">
               CommentTube
             </Typography>
           </div>
-          <hr style={{ width: "100%", border: "1px solid #E4E0E0FF", marginTop: "1px", marginBottom: "10px" }} />
+          <hr className="commentTubeDivider" />
         </Grid>
 
         {/* Form Input API Key dan YouTube URL */}
         <Grid item xs={12} md={6}>
-          <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} style={{ width: "203%", marginRight: "13px" }} />
+          <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} className="youtubeInput" />
         </Grid>
         <Grid item xs={12}>
-          <Button fullWidth variant="contained" style={{ backgroundColor: "#CC0000", color: "white", fontWeight: "bold", fontSize: "16px", padding: "10px" }} onClick={handleFetchComments} disabled={loading}>
-            <img src="./Vector.png" alt="Extract Icon" style={{ width: "25px", height: "25px", marginRight: "13px" }} />
-            {loading ? "Memuat..." : "EXTRACT COMMENTS"}
+          <Button fullWidth variant="contained" className="extractButton" onClick={handleFetchComments} disabled={loading}>
+            <img src="./Vector.png" alt="Extract Icon" className="extractIcon" />
+            <span style={{ color: loading ? "white" : "inherit" }}>{loading ? "Memuat..." : "EXTRACT COMMENTS"}</span>
           </Button>
-          {error && <div style={{ color: "red", textAlign: "center", marginTop: "10px" }}>{error}</div>}
-          <hr style={{ width: "100%", border: "1px solid #E4E0E0FF", marginTop: "40px", marginBottom: "10px" }} />
+          {error && <div className="errorText">{error}</div>}
+          <hr className="divider" />
         </Grid>
 
-        <div style={{ marginBottom: "20px" }}>
-          <Typography variant="h6" className="detail-video-title" style={{ fontWeight: "500", marginBottom: "10px", margin: "30px" }}>
-            Detail Video
+        <div className="videoDetailContainer">
+          <Typography variant="h6" className="detailVideoTitle">
+            Video Detail
           </Typography>
 
-          <Paper elevation={3} className="video-detail" style={{ padding: "20px" }}>
+          <Paper elevation={3} className="videoDetail">
             {fetchedVideoDetails ? (
               <>
-                <div style={{ display: "flex", alignItems: "flex-start" }}>
-                  {/* Thumbnail Video */}
-                  <img src={`https://img.youtube.com/vi/${fetchedVideoDetails.video_embed_url.split("/embed/")[1]}/maxresdefault.jpg`} alt="Video Thumbnail" style={{ marginRight: "20px", width: "350px", height: "auto" }} />
-                  <div style={{ flexGrow: 1 }}>
-                    <Typography variant="h6" className="video-title">
+                <div className="videoDetailContent">
+                  <img src={`https://img.youtube.com/vi/${fetchedVideoDetails.video_embed_url.split("/embed/")[1]}/maxresdefault.jpg`} alt="Video Thumbnail" className="videoThumbnail" />
+                  <div className="videoInfo">
+                    <Typography variant="h6" className="videoTitle">
                       {fetchedVideoDetails.video_details.uploader.title}
                     </Typography>
-
-                    <div className="video-description-container">
-                      <Typography variant="body2" className="video-description">
+                    <div className="videoDescriptionContainer">
+                      <Typography variant="body2" className="videoDescription">
                         {fetchedVideoDetails.video_details.uploader.description}
                       </Typography>
                     </div>
@@ -343,75 +410,70 @@ function App() {
                 </div>
 
                 {/* Uploader info */}
-                <div style={{ display: "flex", alignItems: "center", marginTop: "15px" }}>
-                  <img src={fetchedVideoDetails.video_details.uploader.photo} alt="Uploader Logo" style={{ width: "30px", height: "30px", marginRight: "10px" }} />
-                  <Typography variant="subtitle2" className="video-channel">
-                    <strong className="channel-name"> {fetchedVideoDetails.video_details.uploader.username} </strong>
-                    {fetchedVideoDetails.video_details.uploader.verified && (
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified Badge" style={{ width: "16px", height: "16px", margin: "7px" }} />
-                    )}
-                    | {fetchedVideoDetails.video_details.uploader.subscriber_count}
+                <div className="uploaderInfo">
+                  <img src={fetchedVideoDetails.video_details.uploader.photo} alt="Uploader Logo" className="uploaderLogo" />
+                  <Typography variant="subtitle2" className="videoChannel">
+                    <strong className="channelName">{fetchedVideoDetails.video_details.uploader.username}</strong>
+                    {fetchedVideoDetails.video_details.uploader.verified && <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified Badge" className="verifiedBadge" />} |{" "}
+                    <span style={{ fontSize: "13px", color: "#909090" }}> {fetchedVideoDetails.video_details.uploader.subscriber_count}</span>{" "}
                   </Typography>
                 </div>
               </>
             ) : (
-              <div>
-                <div style={{ display: "flex", alignItems: "flex-start" }}>
-                  <div style={{ backgroundColor: "#e0e0e0", width: "650px", height: "200px", marginRight: "20px", borderRadius: "8px" }} />
-                  <div style={{ flexGrow: 1 }}>
-                    <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "80%", marginBottom: "10px", borderRadius: "4px" }} />
-                    <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
-                    <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px", marginBottom: "8px" }} />
-                    <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "100%", borderRadius: "4px" }} />
+              <div className="videoSkeleton">
+                <div className="skeletonContent">
+                  <div className="skeletonThumbnail" />
+                  <div className="skeletonInfo">
+                    <div className="skeletonLine" />
+                    <div className="skeletonLine" />
+                    <div className="skeletonLine" />
+                    <div className="skeletonLine" />
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", marginTop: "15px" }}>
-                  <div style={{ backgroundColor: "#e0e0e0", width: "30px", height: "30px", borderRadius: "50%", marginRight: "10px" }} />
-                  <div style={{ backgroundColor: "#e0e0e0", height: "20px", width: "40%", borderRadius: "4px" }} />
+                <div className="skeletonUploaderInfo">
+                  <div className="skeletonUploaderLogo" />
+                  <div className="skeletonUploaderName" />
                 </div>
-                <Typography variant="body1" style={{ textAlign: "center", marginTop: "15px", fontStyle: "italic" }}>
+                <Typography variant="body1" className="noVideoMessage">
                   No video available
                 </Typography>
               </div>
             )}
           </Paper>
         </div>
+
         {loading && (
-          <div style={{ textAlign: "center", marginTop: "10px" }}>
-            <div className="loading-spinner"></div>
+          <div className="loadingContainer">
+            <div className="loadingSpinner"></div>
           </div>
         )}
 
         <Grid item xs={12} md={6}>
-          <div elevation={3} className="comment-keyword-paper">
-            <Typography variant="h6" style={{ fontWeight: "500", marginBottom: "10px" }}>
+          <div className="commentKeywordPaper">
+            <Typography variant="h6" className="commentKeywordTitle">
               Comment Keywords
             </Typography>
             {loading ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "20px" }}>
+              <div className="loadingContainer">
                 <CircularProgress />
-                <Typography variant="body1" style={{ marginTop: "10px" }}>
+                <Typography variant="body1" className="loadingText">
                   Loading comment keywords...
                 </Typography>
               </div>
             ) : keywords.length > 0 ? (
-              <div className="comment-keyword-container">
+              <div className="commentKeywordContainer">
                 {keywords.map((keyword, index) => (
-                  <Chip key={index} label={keyword} className="comment-chip" />
+                  <Chip key={index} label={keyword} className="commentChip" />
                 ))}
               </div>
             ) : (
-              <div>
-                <div style={{ display: "flex", alignItems: "flex-start" }}>
-                  <div style={{ flexGrow: 1 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
-                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
-                      <div style={{ backgroundColor: "#e0e0e0", height: "30px", width: "30%", borderRadius: "4px", marginBottom: "10px" }} />
-                    </div>
-                  </div>
+              <div className="noKeywordContainer">
+                <div className="skeletonKeywords">
+                  <div className="skeletonBox" />
+                  <div className="skeletonBox" />
+                  <div className="skeletonBox" />
                 </div>
-                <Typography variant="body2" style={{ textAlign: "center", marginTop: "15px", fontStyle: "italic" }}>
+                <Typography variant="body2" className="noKeywordMessage">
                   No keywords found for the comments.
                 </Typography>
               </div>
@@ -419,67 +481,82 @@ function App() {
           </div>
         </Grid>
 
-        <div elevation={3} className="sentiment-paper">
-          <Typography variant="h6" style={{ fontWeight: "500", marginBottom: "18px", marginLeft: "15px" }}>
+        <div className="sentimentPaper">
+          <Typography variant="h6" className="sentimentTitle">
             Sentiment Analytic
           </Typography>
 
           {loading ? (
-            <div style={{ textAlign: "center", padding: "20px" }}>
+            <div className="loadingContainer">
               <CircularProgress />
-              <Typography variant="body1" style={{ marginTop: "10px" }}>
+              <Typography variant="body1" className="loadingText">
                 Loading sentiment analytic...
               </Typography>
             </div>
           ) : (
             <div>
-              <div className="sentiment-container">
-                <div className="sentiment-chart">
+              <div className="sentimentContainer">
+                <div className="sentimentChart">
                   {sentimentData.datasets[0].data.some((value) => value > 0) ? (
                     <>
                       <Doughnut
                         data={sentimentData}
                         options={{
                           cutout: "70%",
+                          responsive: true,
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                            tooltip: {
+                              callbacks: {
+                                label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`,
+                              },
+                            },
+                          },
+                          animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                          },
                         }}
                       />
-                      <div className="sentiment-chart-text">
-                        {totalComments} <br /> Sentiment
+                      <div className="sentimentChartText">
+                        <span className="totalComments">{totalComments}</span> <br />
+                        <span className="sentimentsText">Sentiments</span>
                       </div>
                     </>
                   ) : (
-                    <div style={{ textAlign: "center", padding: "20px" }}>
-                      <div style={{ backgroundColor: "#e0e0e0", height: "170px", width: "100%", borderRadius: "100px", marginBottom: "10px" }} />
-                      <Typography variant="body2" style={{ textAlign: "center", fontStyle: "italic" }}>
+                    <div className="noSentimentDataContainer">
+                      <div className="noSentimentDataCircle" />
+                      <Typography variant="body2" className="noSentimentMessage">
                         No sentiment data available.
                       </Typography>
                     </div>
                   )}
                 </div>
 
-                <div className="sentiment-details">
-                  <div className="sentiment-item" style={{ marginBottom: "15px" }}>
-                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#CC0000", display: "inline-block", marginRight: "5px" }} />
-                    <span style={{ fontWeight: 400 }}>
-                      {" "}
-                      Negative | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
-                    </span>
+                {showSentiment && (
+                  <div className="sentimentDetails">
+                    <div className="sentimentItem">
+                      <div className="sentimentColorIndicator negativeColor" />
+                      <span className="sentimentText">
+                        Negative | <i>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
+                      </span>
+                    </div>
+                    <div className="sentimentItem">
+                      <div className="sentimentColorIndicator neutralColor" />
+                      <span className="sentimentText">
+                        Neutral | <i>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
+                      </span>
+                    </div>
+                    <div className="sentimentItem">
+                      <div className="sentimentColorIndicator positiveColor" />
+                      <span className="sentimentText">
+                        Positive | <i>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="sentiment-item" style={{ marginBottom: "15px" }}>
-                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#065FD4", display: "inline-block", marginRight: "5px" }} />
-                    <span style={{ fontWeight: 400 }}>
-                      {" "}
-                      Neutral | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
-                    </span>
-                  </div>
-                  <div className="sentiment-item">
-                    <div style={{ width: "15px", height: "15px", borderRadius: "50%", backgroundColor: "#34C759", display: "inline-block", marginRight: "5px" }} />
-                    <span style={{ fontWeight: 400 }}>
-                      {" "}
-                      Positive | <i style={{ marginLeft: "5px" }}>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -487,127 +564,128 @@ function App() {
 
         {/* Table Comment Section */}
         <Grid item xs={12}>
-          <Typography variant="h6" style={{ fontWeight: "500", marginBottom: "10px" }}>
-            Extracted Comment <i style={{ color: "#CC0000" }}>({totalComments})</i>
+          <Typography variant="h6" className="extractedCommentTitle">
+            Extracted Comment <i className="totalCommentsCount">({totalComments})</i>
           </Typography>
           {loading && <div></div>}
           {renderPollingStatus()}
-          <div elevation={3} className="comment-table-paper" style={{ marginTop: "20px", marginBottom: "20px", padding: "20px" }}>
+          <div elevation={3} className="commentTablePaper">
             {loading ? (
-              <div className="loading-comments">
+              <div className="loadingComments">
                 <CircularProgress />
                 Loading comments...
               </div>
             ) : (
               <>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", width: "100%" }}>
-                  <TextField
-                    className="search-input"
-                    variant="outlined"
-                    label="Search..."
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                    style={{ flex: 1, marginRight: "10px" }}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+                {/* Hanya tampilkan elemen berikut setelah tombol 'Extract Comment' diklik */}
+                {totalComments > 0 && (
+                  <>
+                    <div className="searchContainer">
+                      <img className="searchIcon" src="./search.png" alt="search icon" />
+                      <input type="text" className="searchInput" placeholder="Search comment..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
 
-                  <div className="date-picker-container">
-                    <img src="./date.png" alt="calendar icon" style={{ cursor: "pointer", marginRight: "7px" }} />
-                    <DatePicker selected={selectedDate} onChange={handleDateChange} dateFormat="dd/MM/yyyy" placeholderText="Select Date" className="date-picker-input" popperClassName="date-picker-popper" popperPlacement="top-end" />
-                  </div>
+                      <img className="calendarIcon" src="./date.png" alt="calendar icon" onClick={toggleDatePicker} />
 
-                  <div style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
-                    <Select value={selectedSentiment} variant="standard" className="custom-select" onChange={handleSentimentChange}>
-                      <MenuItem value="All sentiment">All sentiment</MenuItem>
-                      <MenuItem value="positive">Positive</MenuItem>
-                      <MenuItem value="neutral">Neutral</MenuItem>
-                      <MenuItem value="negative">Negative</MenuItem>
-                    </Select>
-                  </div>
+                      {isDatePickerVisible && (
+                        <div className="datePickerContainer" ref={datePickerRef}>
+                          <DatePicker selected={selectedDate} onChange={handleDateChange} inline />
+                        </div>
+                      )}
 
-                  <Button className="btn-download" style={{ marginRight: "10px" }} onClick={downloadCSV}>
-                    <DownloadIcon />
-                  </Button>
-                </div>
-                <TableContainer style={{ maxHeight: "100%", overflow: "auto" }}>
-                  <Table stickyHeader>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>No</TableCell>
-                        <TableCell>User</TableCell>
-                        <TableCell>Comment ID</TableCell>
-                        <TableCell>Comment content</TableCell>
-                        <TableCell>Comment at</TableCell>
-                        <TableCell>Comment keyword</TableCell>
-                        <TableCell>Sentiment</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {commentsToDisplay.length > 0 ? (
-                        commentsToDisplay.map((comment, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{indexOfFirstComment + index + 1}</TableCell>
-                            <TableCell>{comment.author}</TableCell>
-                            <TableCell>
-                              <span style={{ color: "#3EA6FF" }}>{comment.comment_id}</span>
+                      <button className="btnDownload" onClick={downloadCSV}>
+                        <img className="downloadIcon" src="./download.png" alt="download icon" />
+                      </button>
+
+                      <select className="customSelect" value={selectedSentiment} onChange={handleSentimentChange}>
+                        <option value="All sentiment">All sentiment</option>
+                        <option value="positive">Positive</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="negative">Negative</option>
+                      </select>
+                    </div>
+
+                    <TableContainer className="tableContainer">
+                      <Table stickyHeader>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell className="tableHeader" onClick={() => requestSort("index")}>
+                              No {getIndicator("index")}
                             </TableCell>
-                            <TableCell>{comment.text}</TableCell>
-                            <TableCell>{comment.time_formatted}</TableCell>
-                            <TableCell>
-                              {comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0
-                                ? comment.keywords.map((keyword, idx) => (
-                                    <span
-                                      key={idx}
-                                      style={{
-                                        padding: "5px 10px",
-                                        border: "1px solid #000000FF",
-                                        color: "#000000FF",
-                                        borderRadius: "20px",
-                                        margin: "5px",
-                                        display: "inline-block",
-                                        fontSize: "12px",
-                                      }}
-                                    >
-                                      {keyword}
-                                    </span>
-                                  ))
-                                : "N/A"}
+                            <TableCell className="tableHeader" onClick={() => requestSort("author")}>
+                              User {getIndicator("author")}
                             </TableCell>
-                            <TableCell>
-                              <span
-                                style={{
-                                  padding: "5px 10px",
-                                  backgroundColor: comment.sentiment_label === "positive" ? "#34C759" : comment.sentiment_label === "neutral" ? "#3EA6FF" : comment.sentiment_label === "negative" ? "#CC0000" : "#CCCCCC",
-                                  color: "#fff",
-                                  borderRadius: "20px",
-                                  width: "100%",
-                                }}
-                              >
-                                {comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}
-                              </span>
+                            <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
+                              Comment ID {getIndicator("comment_id")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("text")}>
+                              Comment content {getIndicator("text")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
+                              Comment at {getIndicator("time_formatted")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
+                              Comment keyword {getIndicator("keywords")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
+                              Sentiment {getIndicator("sentiment_label")}
                             </TableCell>
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={7} align="center" style={{ fontStyle: "italic" }} >
-                            No comments available
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                          {sortedCommentsToDisplay.length > 0 ? (
+                            sortedCommentsToDisplay.map((comment, index) => (
+                              <TableRow key={index}>
+                                <TableCell>{indexOfFirstComment + index + 1}</TableCell>
+                                <TableCell>{comment.author}</TableCell>
+                                <TableCell>
+                                  <span className="commentId">{comment.comment_id}</span>
+                                </TableCell>
+                                <TableCell>{comment.text}</TableCell>
+                                <TableCell>{comment.time_formatted}</TableCell>
+                                <TableCell>
+                                  {comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0
+                                    ? comment.keywords.map((keyword, idx) => (
+                                        <span className="keywordBadge" key={idx}>
+                                          {keyword}
+                                        </span>
+                                      ))
+                                    : "no keyword detected"}
+                                </TableCell>
+                                <TableCell>
+                                  <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={7} align="center" className="noComments">
+                                No comments available
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
 
-                <Grid item xs={12}>
-                  {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" style={{ marginTop: "20px", display: "flex", justifyContent: "center" }} />}
-                </Grid>
+                    <div className="pagination-info">
+                      <span className="pagination-count" style={{ color: "red" }}>
+                        {commentsToDisplay.length}
+                      </span>{" "}
+                      of {totalPages} results | Go to page:
+                      <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
+                        {Array.from({ length: totalPages }, (_, index) => (
+                          <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
+                            {index + 1}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </div>
+
+                    <Grid item xs={12}>
+                      {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
+                    </Grid>
+                  </>
+                )}
               </>
             )}
           </div>

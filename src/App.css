@@ -8,17 +8,200 @@ body {
   padding: 20px;
 }
 
+.commentTubeContainer {
+  margin-bottom: 20px;
+}
+
 .commentTubeHeader {
  display: flex;
  align-items: center;
  padding: 10px;
 }
 
-.commentTubeLogo {
-  width: 45px;
-  height: auto;
-  margin-right: 10px ;
+.commentTubeTitle {
+  font-weight: 500 !important;
+  font-size: 25px !important;
 }
+
+.commentTubeDivider {
+  width: 100%;
+  border: 1px solid #E4E0E0FF;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+.commentTubeLogo {
+  width: 35px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.youtubeInput {
+  width: 1266px !important;
+  margin-right: 13px;
+}
+
+.extractButton {
+  background-color: #CC0000 !important;  
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px;
+}
+
+.extractButton:hover {
+  background-color: #b10404 !important; 
+  transition: background-color 0.3s ease, box-shadow 0.3s ease !important; 
+}
+
+.extractIcon {
+  width: 25px;
+  height: 25px;
+  margin-right: 13px;
+}
+
+.loadingText {
+  color: white !important; 
+}
+
+.errorText {
+  color: red;
+  text-align: center;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+.divider {
+  width: 100%;
+  border: 1px solid #E4E0E0FF;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+.videoDetailContainer {
+  margin-bottom: 30px;
+}
+
+.videoDetail {
+  padding: 10px;
+  margin: 20px;
+  width: 1254px;
+}
+
+.videoDetailContent {
+  display: flex;
+  align-items: flex-start;
+}
+
+.videoThumbnail {
+  margin-right: 20px;
+  width: 400px;
+  height: auto;
+}
+
+.videoInfo {
+  flex-grow: 1;
+}
+
+.videoTitle {
+  margin-bottom: 10px;
+}
+
+.videoDescriptionContainer {
+  margin-top: 5px;
+  max-height: 150px; 
+  overflow-y: auto;
+}
+
+.videoDescription {
+  font-size: 13px !important;
+}
+
+.uploaderInfo {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.uploaderLogo {
+  width: 30px;
+  height: auto;
+  margin-right: 10px;
+}
+
+.videoChannel .channelName {
+  font-weight: bold;
+  font-size: 14px !important;
+}
+
+.verifiedBadge {
+  width: 16px;
+  height: auto;
+  margin-left: 5px;
+  margin-top: 3px;
+  margin-bottom: -4px;
+}
+
+.videoSkeleton {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeletonContent {
+  display: flex;
+  align-items: flex-start;
+}
+
+.skeletonThumbnail {
+  background-color: #e0e0e0;
+  width: 650px;
+  height: 200px;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+.skeletonInfo {
+  flex-grow: 1;
+}
+
+.skeletonLine {
+  background-color: #e0e0e0;
+  height: 20px;
+  width: 100%;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeletonUploaderInfo {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.skeletonUploaderLogo {
+  background-color: #e0e0e0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.skeletonUploaderName {
+  background-color: #e0e0e0;
+  height: 20px;
+  width: 40%;
+  border-radius: 4px;
+}
+
+.noVideoMessage {
+  text-align: center;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+/* .loadingContainer {
+  text-align: center;
+  margin-top: 10px;
+} */
 
 .loading-video {
   display: flex;
@@ -51,6 +234,11 @@ body {
   margin: 30px;
 }
 
+.detailVideoTitle {
+  font-size: 500 !important;
+  margin: 23px !important;
+}
+
 .video-title {
   font-weight: bold;
   font-size: 18px;
@@ -64,12 +252,12 @@ body {
 }
 
 .video-description {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
 }
 
 .video-channel {
-  font-size: 14px;
+  font-size: 13px;
   color: #777;
   margin-top: 10px;
 }
@@ -83,14 +271,14 @@ body {
   vertical-align: middle;
 }
 
-.comment-keyword-paper {
-  padding: 20px;
+.commentKeywordPaper {
+  padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.comment-keyword-container {
+.commentKeywordContainer {
   display: flex;
   flex-wrap: wrap; 
   gap: 10px;
@@ -98,69 +286,99 @@ body {
   margin-bottom: 20px; 
 }
 
-.comment-chip {
-  background-color: #ffffff; 
-  color: #333333; 
-  font-size: 14px; 
-  font-weight: 450;
-  border: 3px solid #e0e0e0; 
-  padding: 10px 15px;
-  border-radius: 20px; 
-  transition: background-color 0.3s ease, box-shadow 0.3s ease; 
-  cursor: pointer; 
+.commentKeywordTitle {
+  font-weight: 500;
+  margin: 10px !important;
+  margin-left: 0 !important; 
+  padding-left: -15px; 
 }
 
-.comment-chip:hover {
-  background-color: #065fd4; 
+.loadingContainer {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.loadingText {
+  margin-top: 10px;
+}
+
+.commentChip {
+  margin-right: 1px;
+  background-color: #000000; 
+  color: #ffffff; 
+  font-size: 13px; 
+  font-weight: 400;
+  border: 3px solid #ff0000; 
+  border-radius: 20px; 
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; 
+}
+
+.commentChip:hover {
+  background-color: #C7C7C7; 
   color: white; 
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
 }
 
-.spinner-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7); 
+.noKeywordContainer {
+  margin-right: 200px !important;
+  padding: 15px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  z-index: 1000;
 }
 
-.spinner {
-  border: 6px solid rgba(255, 255, 255, 0.3);
-  border-top: 6px solid #ffffff;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
+.skeletonKeywords {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
-.sentiment-paper {
+.skeletonBox {
+  background-color: #e0e0e0;
+  height: 30px;
+  width: 30%;
+  border-radius: 20px;
+}
+
+.noKeywordMessage {
+  text-align: center;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+.sentimentPaper {
   margin-top: 20px;
   padding: 20px;
   display: flex;
   flex-direction: column;
 }
 
-.sentiment-container {
+.sentimentTitle {
+  font-weight: 500;
+  margin-bottom: 20px !important;
+  margin-left: 7px !important;
+}
+
+.sentimentContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.sentiment-chart {
+.sentimentChart {
   position: relative;
   flex: 1;
-  max-width: 250px;
+  max-width: 200px;
   margin-right: 20px;
+  justify-content: center;
 }
 
-.sentiment-chart-text {
+.sentimentChartText {
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -10%);
   text-align: center;
@@ -168,23 +386,112 @@ body {
   font-size: 18px;
 }
 
-.sentiment-details {
+
+.totalComments {
+  font-weight: 500; 
+  font-size: 30px; 
+}
+
+.sentimentsText {
+  font-weight: normal; 
+  font-size: 13px; 
+  color: #383838;
+}
+
+.noSentimentDataContainer {
+  text-align: center;
+  padding: 20px;
+}
+
+.noSentimentDataCircle {
+  background-color: #e0e0e0;
+  height: 160px;
+  width: 100%;
+  border-radius: 200px;
+  margin-bottom: 10px;
+  margin-top: -22px;
+}
+
+.noSentimentMessage {
+  font-style: italic;
+}
+
+.sentimentDetails {
   flex: 1;
   text-align: left;
 }
 
-.sentiment-item {
+.sentimentItem {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
 }
 
-.comment-table-paper {
+.sentimentColorIndicator {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.negativeColor {
+  background-color: #CC0000;
+  }
+
+.neutralColor {
+  background-color: #065FD4;
+}
+
+.positiveColor {
+  background-color: #34C759;
+}
+
+.sentimentText {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.sentimentText i {
+  margin: 0 8px; 
+}
+
+.extractedCommentTitle {
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.totalCommentsCount {
+  color: #CC0000;
+}
+
+.tableHeader {
+  cursor: pointer;
+  background-color: #C7C7C7 !important;
+  color: #000000 !important; 
+  text-align: center !important;
+  padding: 10px !important;
+}
+
+.tableHeader svg {
+  width: 25px;
+  height: auto;
+  vertical-align: middle;
+}
+
+.commentTablePaper {
   background-color: #fff;
   border-radius: 8px;
-  padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 20px; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.loadingComments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
 .comment-table-paper table {
@@ -207,10 +514,6 @@ body {
   z-index: 1;
 }
 
-.pagination {
-  margin-top: 20px;
-}
-
 hr {
   border: 1px solid #e4e0e0;
 }
@@ -219,66 +522,151 @@ h5, h6 {
   margin: 0;
 }
 
-.button {
-  margin: 10px 0;
-  padding: 10px;
+.searchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 1202px;
+  gap: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
 }
 
-.btn-download {
-  background-color: transparent; 
+.searchContainer:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.searchIcon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  cursor: pointer;
+  filter: grayscale(50%);
+  transition: filter 0.3s;
+}
+
+.searchIcon:hover {
+  filter: grayscale(0%);
+}
+
+.searchInput {
+  flex: 1;
   border: none;
-  outline: none; 
-  cursor: default; 
+  outline: none;
+  font-size: 14px;
+  padding: 6px 0;
+  background-color: transparent;
 }
 
-.btn-download:hover {
-  background-color: transparent; 
+.calendarIcon,
+.downloadIcon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-.btn-download:focus {
-  outline: none; 
+.calendarIcon:hover,
+.downloadIcon:hover {
+  transform: scale(1.1);
 }
 
-.btn-download:active {
-  background-color: transparent; 
+.customSelect {
+  min-width: 130px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
-.custom-select {
-  margin: 10px;
-  min-width: 50px;
+.btnDownload {
   background: none;
   border: none;
+  padding: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border-radius: 4px;
 }
 
-.custom-select:before,
-.custom-select:after,
-.custom-select:hover,
-.custom-select:focus {
-  border-bottom: none !important; 
+.btnDownload:hover {
+  transform: scale(1.05);
 }
 
-.pagination {
+.datePickerContainer {
+  position: absolute;
+  top: -275px; 
+  left: 875px; 
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 5px; 
+}
+
+/* .pagination {
   display: flex;
   justify-content: flex-end;
-}
+  margin-top: 16px;
+} */
 
 .hidden-date-picker input {
   display: none; 
 }
 
-.date-picker-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-right: 10px;
+.tableContainer {
+  max-height: 100%;
+  overflow: auto;
+  margin-top: 25px;
 }
 
-.date-picker-input {
-  z-index: 9999;
+.MuiTableCell-root {
+  font-size: 13px !important;
 }
 
-.date-picker-popper {
-  z-index: 9999; 
+.keywordBadge {
+  padding: 5px 10px;
+  border: 1px solid #000000FF;
+  color: #000000FF;
+  border-radius: 20px;
+  margin: 5px;
+  display: inline-block;
+  font-size: 13px;
+}
+
+.sentimentLabel {
+  padding: 5px 10px;
+  color: #fff;
+  border-radius: 20px;
+  width: 100%;
+}
+
+.sentimentLabel.positive {
+  background-color: #34C759;
+}
+
+.sentimentLabel.neutral {
+  background-color: #3EA6FF;
+}
+
+.sentimentLabel.negative {
+  background-color: #CC0000;
+}
+
+.sentimentLabel.default {
+  background-color: #CCCCCC;
+}
+
+.noComments {
+  font-style: italic;
 }
 
 .polling-status {
@@ -286,136 +674,47 @@ h5, h6 {
   font-style: italic;
 }
 
-/* Responsive Styles */
-@media (max-width: 1200px) {
-  .video-detail {
-    margin: 20px;
-  }
-
-  .sentiment-chart {
-    max-width: 200px;
-  }
-
-  .comment-table-paper {
-    margin-top: 15px;
-  }
-
-  .video-title {
-    font-size: 18px;
-  }
+.pagination-info {
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #333;
+  margin: 20px;
+  margin-left: 310px;
 }
 
-@media (max-width: 992px) {
-  .loading-spinner {
-    width: 40px; 
-    height: 40px; 
-  }
-
-  .video-description {
-    font-size: 13px;
-  }
-
-  .comment-keyword-container {
-    justify-content: center;
-  }
-
-  .sentiment-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .sentiment-chart {
-    margin-right: 0;
-    margin-bottom: 20px;
-    max-width: 100%;
-  }
-
-  .comment-chip {
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .pagination {
-    flex-direction: column;
-    align-items: center;
-    margin-top: 15px;
-  }
+.pagination-count {
+  color: red;
+  margin-right: 5px; 
+  font-size: 13px !important;
 }
 
-@media (max-width: 768px) {
-  .main-container {
-    padding: 10px;
-  }
-
-  .video-detail {
-    margin: 10px;
-  }
-
-  .video-title {
-    font-size: 16px;
-  }
-
-  .video-description {
-    font-size: 12px;
-  }
-
-  .comment-keyword-paper,
-  .sentiment-paper {
-    padding: 10px;
-  }
-
-  .comment-table-paper {
-    padding: 15px;
-  }
-
-  .pagination {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .spinner-overlay {
-    padding: 10px;
-  }
-
-  .comment-chip {
-    font-size: 12px; 
-    padding: 8px 12px; 
-  }
+.pagination-select {
+  margin-left: 10px;
+  width: 70px;
+  font-size: 13px !important;
+  height: 30px;
+  display: inline-block;
+  border: 1px solid #ffffff; 
+  color: red;
+  border-radius: 5px; 
+  background-color: #ffffff;
+  transition: background-color 0.4s ease; 
 }
 
-@media (max-width: 576px) {
-  .video-title {
-    font-size: 14px;
-  }
-
-  .video-description {
-    font-size: 11px;
-  }
-
-  .video-channel {
-    font-size: 12px;
-  }
-
-  .sentiment-chart-text {
-    font-size: 16px;
-  }
-
-  .comment-table-paper {
-    padding: 10px;
-  }
-
-  .comment-table-paper th,
-  .comment-table-paper td {
-    padding: 8px;
-    font-size: 12px;
-  }
-
-  .button {
-    padding: 8px;
-  }
-
-  .custom-select {
-    min-width: 40px;
-  }
+.pagination {
+  font-size: 13px !important;
+  margin-top: -52px;
+  display: flex;
+  justify-content: center;
+  margin-left: 330px;
 }
 
+.pagination .MuiPaginationItem-root {
+  font-size: 13px !important;
+}
+
+.table-cell .indicator {
+  margin-left: 8px;
+  font-size: 12px; 
+  color: #333; 
+}
