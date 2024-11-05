@@ -1,8 +1,8 @@
 @media (max-width: 1200px) {
-    .youtubeInput {
-      width: 100% !important;
-    }
-
+  .youtubeInput {
+    width: 100% !important;
+  }
+  
     .commentTablePaper {
       padding: 15px; /* Adjust padding for smaller screens */
     }
@@ -75,82 +75,6 @@
       .pagination-count,
       .pagination-select {
         margin: 5px 0; 
-      }
-  }
-
-@media (max-width: 1075px) {
-    .youtubeInput {
-      width: 100% !important;
-    }
-  
-    .videoDetail {
-      width: auto;
-    }
-  
-    .videoThumbnail {
-      width: 100%;
-    }
-  
-    .videoDetailContainer, .videoSkeleton {
-      margin: 0 10px;
-    }
-  
-    .videoTitle, .video-description, .channel-name {
-      font-size: 16px;
-    }
-
-    .skeletonThumbnail {
-        width: 100%; 
-        height: auto; 
-      }
-    
-      .skeletonContent {
-        flex-direction: column; 
-      }
-    
-      .skeletonInfo {
-        width: 100%; 
-      }
-
-      .commentKeywordPaper {
-        max-width: 100%; 
-        padding: 5px; 
-      }
-    
-      .commentChip {
-        font-size: 12px; 
-      }
-    
-      .skeletonBox {
-        width: 45%; 
-        margin-bottom: 10px; 
-      }
-    
-      .noKeywordContainer {
-        margin-right: 0; 
-      }
-
-      .sentimentPaper {
-        padding: 15px; 
-      }
-    
-      .sentimentContainer {
-        flex-direction: column; 
-        align-items: flex-start; 
-      }
-    
-      .sentimentChart {
-        max-width: 100%; 
-        margin-right: 0; 
-        margin-bottom: 15px; 
-      }
-    
-      .totalComments {
-        font-size: 24px; /* Adjust font size for better readability */
-      }
-    
-      .sentimentText {
-        font-size: 12px; /* Slightly smaller font size for better fitting */
       }
   }
   

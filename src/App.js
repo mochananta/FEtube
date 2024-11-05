@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./App.css";
-// import "./reponsive.css";
+import "./reponsive.css";
 
 Chart.register(...registerables);
 
@@ -375,7 +375,7 @@ function App() {
         </Grid>
 
         {/* Form Input API Key dan YouTube URL */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12}>
           <TextField fullWidth label="YouTube Link...." variant="outlined" value={url} onChange={(e) => setUrl(e.target.value)} className="youtubeInput" />
         </Grid>
         <Grid item xs={12}>
@@ -387,60 +387,62 @@ function App() {
           <hr className="divider" />
         </Grid>
 
-        <div className="videoDetailContainer">
-          <Typography variant="h6" className="detailVideoTitle">
-            Video Detail
-          </Typography>
+        <Grid item xs={12}>
+          <div className="videoDetailContainer">
+            <Typography variant="h6" className="detailVideoTitle">
+              Video Detail
+            </Typography>
 
-          <Paper elevation={3} className="videoDetail">
-            {fetchedVideoDetails ? (
-              <>
-                <div className="videoDetailContent">
-                  <img src={`https://img.youtube.com/vi/${fetchedVideoDetails.video_embed_url.split("/embed/")[1]}/maxresdefault.jpg`} alt="Video Thumbnail" className="videoThumbnail" />
-                  <div className="videoInfo">
-                    <Typography variant="h6" className="videoTitle">
-                      {fetchedVideoDetails.video_details.uploader.title}
-                    </Typography>
-                    <div className="videoDescriptionContainer">
-                      <Typography variant="body2" className="videoDescription">
-                        {fetchedVideoDetails.video_details.uploader.description}
+            <Paper elevation={3} className="videoDetail">
+              {fetchedVideoDetails ? (
+                <>
+                  <div className="videoDetailContent">
+                    <img src={`https://img.youtube.com/vi/${fetchedVideoDetails.video_embed_url.split("/embed/")[1]}/maxresdefault.jpg`} alt="Video Thumbnail" className="videoThumbnail" />
+                    <div className="videoInfo">
+                      <Typography variant="h6" className="videoTitle">
+                        {fetchedVideoDetails.video_details.uploader.title}
                       </Typography>
+                      <div className="videoDescriptionContainer">
+                        <Typography variant="body2" className="videoDescription">
+                          {fetchedVideoDetails.video_details.uploader.description}
+                        </Typography>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Uploader info */}
-                <div className="uploaderInfo">
-                  <img src={fetchedVideoDetails.video_details.uploader.photo} alt="Uploader Logo" className="uploaderLogo" />
-                  <Typography variant="subtitle2" className="videoChannel">
-                    <strong className="channelName">{fetchedVideoDetails.video_details.uploader.username}</strong>
-                    {fetchedVideoDetails.video_details.uploader.verified && <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified Badge" className="verifiedBadge" />} |{" "}
-                    <span style={{ fontSize: "13px", color: "#909090" }}> {fetchedVideoDetails.video_details.uploader.subscriber_count}</span>{" "}
+                  {/* Uploader info */}
+                  <div className="uploaderInfo">
+                    <img src={fetchedVideoDetails.video_details.uploader.photo} alt="Uploader Logo" className="uploaderLogo" />
+                    <Typography variant="subtitle2" className="videoChannel">
+                      <strong className="channelName">{fetchedVideoDetails.video_details.uploader.username}</strong>
+                      {fetchedVideoDetails.video_details.uploader.verified && <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified Badge" className="verifiedBadge" />} |{" "}
+                      <span style={{ fontSize: "13px", color: "#909090" }}> {fetchedVideoDetails.video_details.uploader.subscriber_count}</span>{" "}
+                    </Typography>
+                  </div>
+                </>
+              ) : (
+                <div className="videoSkeleton">
+                  <div className="skeletonContent">
+                    <div className="skeletonThumbnail" />
+                    <div className="skeletonInfo">
+                      <div className="skeletonLine" />
+                      <div className="skeletonLine" />
+                      <div className="skeletonLine" />
+                      <div className="skeletonLine" />
+                    </div>
+                  </div>
+                  <div className="skeletonUploaderInfo">
+                    <div className="skeletonUploaderLogo" />
+                    <div className="skeletonUploaderName" />
+                  </div>
+                  <Typography variant="body1" className="noVideoMessage">
+                    No video available
                   </Typography>
                 </div>
-              </>
-            ) : (
-              <div className="videoSkeleton">
-                <div className="skeletonContent">
-                  <div className="skeletonThumbnail" />
-                  <div className="skeletonInfo">
-                    <div className="skeletonLine" />
-                    <div className="skeletonLine" />
-                    <div className="skeletonLine" />
-                    <div className="skeletonLine" />
-                  </div>
-                </div>
-                <div className="skeletonUploaderInfo">
-                  <div className="skeletonUploaderLogo" />
-                  <div className="skeletonUploaderName" />
-                </div>
-                <Typography variant="body1" className="noVideoMessage">
-                  No video available
-                </Typography>
-              </div>
-            )}
-          </Paper>
-        </div>
+              )}
+            </Paper>
+          </div>
+        </Grid>
 
         {loading && (
           <div className="loadingContainer">
@@ -448,119 +450,124 @@ function App() {
           </div>
         )}
 
-        <Grid item xs={12} md={6}>
-          <div className="commentKeywordPaper">
-            <Typography variant="h6" className="commentKeywordTitle">
-              Comment Keywords
-            </Typography>
-            {loading ? (
-              <div className="loadingContainer">
-                <CircularProgress />
-                <Typography variant="body1" className="loadingText">
-                  Loading comment keywords...
-                </Typography>
-              </div>
-            ) : keywords.length > 0 ? (
-              <div className="commentKeywordContainer">
-                {keywords.map((keyword, index) => (
-                  <Chip key={index} label={keyword} className="commentChip" />
-                ))}
-              </div>
-            ) : (
-              <div className="noKeywordContainer">
-                <div className="skeletonKeywords">
-                  <div className="skeletonBox" />
-                  <div className="skeletonBox" />
-                  <div className="skeletonBox" />
-                </div>
-                <Typography variant="body2" className="noKeywordMessage">
-                  No keywords found for the comments.
-                </Typography>
-              </div>
-            )}
-          </div>
-        </Grid>
-
-        <div className="sentimentPaper">
-          <Typography variant="h6" className="sentimentTitle">
-            Sentiment Analytic
-          </Typography>
-
-          {loading ? (
-            <div className="loadingContainer">
-              <CircularProgress />
-              <Typography variant="body1" className="loadingText">
-                Loading sentiment analytic...
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <div className="commentKeywordPaper">
+              <Typography variant="h6" className="commentKeywordTitle">
+                Comment Keywords
               </Typography>
-            </div>
-          ) : (
-            <div>
-              <div className="sentimentContainer">
-                <div className="sentimentChart">
-                  {sentimentData.datasets[0].data.some((value) => value > 0) ? (
-                    <>
-                      <Doughnut
-                        data={sentimentData}
-                        options={{
-                          cutout: "70%",
-                          responsive: true,
-                          plugins: {
-                            legend: {
-                              display: false,
-                            },
-                            tooltip: {
-                              callbacks: {
-                                label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`,
-                              },
-                            },
-                          },
-                          animation: {
-                            animateScale: true,
-                            animateRotate: true,
-                          },
-                        }}
-                      />
-                      <div className="sentimentChartText">
-                        <span className="totalComments">{totalComments}</span> <br />
-                        <span className="sentimentsText">Sentiments</span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="noSentimentDataContainer">
-                      <div className="noSentimentDataCircle" />
-                      <Typography variant="body2" className="noSentimentMessage">
-                        No sentiment data available.
-                      </Typography>
-                    </div>
-                  )}
+              {loading ? (
+                <div className="loadingContainer">
+                  <CircularProgress />
+                  <Typography variant="body1" className="loadingText">
+                    Loading comment keywords...
+                  </Typography>
                 </div>
-
-                {showSentiment && (
-                  <div className="sentimentDetails">
-                    <div className="sentimentItem">
-                      <div className="sentimentColorIndicator negativeColor" />
-                      <span className="sentimentText">
-                        Negative | <i>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
-                      </span>
-                    </div>
-                    <div className="sentimentItem">
-                      <div className="sentimentColorIndicator neutralColor" />
-                      <span className="sentimentText">
-                        Neutral | <i>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
-                      </span>
-                    </div>
-                    <div className="sentimentItem">
-                      <div className="sentimentColorIndicator positiveColor" />
-                      <span className="sentimentText">
-                        Positive | <i>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
-                      </span>
-                    </div>
+              ) : keywords.length > 0 ? (
+                <div className="commentKeywordContainer">
+                  {keywords.map((keyword, index) => (
+                    <Chip key={index} label={keyword} className="commentChip" />
+                  ))}
+                </div>
+              ) : (
+                <div className="noKeywordContainer">
+                  <div className="skeletonKeywords">
+                    <div className="skeletonBox" />
+                    <div className="skeletonBox" />
+                    <div className="skeletonBox" />
                   </div>
-                )}
-              </div>
+                  <Typography variant="body2" className="noKeywordMessage">
+                    No keywords found for the comments.
+                  </Typography>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </Grid>
+
+          {/* Sentiment Analytic Section */}
+          <Grid item xs={12} md={6}>
+            <div className="sentimentPaper">
+              <Typography variant="h6" className="sentimentTitle">
+                Sentiment Analytic
+              </Typography>
+
+              {loading ? (
+                <div className="loadingContainer1">
+                  <CircularProgress />
+                  <Typography variant="body1" className="loadingText">
+                    Loading sentiment analytic...
+                  </Typography>
+                </div>
+              ) : (
+                <div>
+                  <div className="sentimentContainer">
+                    <div className="sentimentChart">
+                      {sentimentData.datasets[0].data.some((value) => value > 0) ? (
+                        <>
+                          <Doughnut
+                            data={sentimentData}
+                            options={{
+                              cutout: "70%",
+                              responsive: true,
+                              plugins: {
+                                legend: {
+                                  display: false,
+                                },
+                                tooltip: {
+                                  callbacks: {
+                                    label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`,
+                                  },
+                                },
+                              },
+                              animation: {
+                                animateScale: true,
+                                animateRotate: true,
+                              },
+                            }}
+                          />
+                          <div className="sentimentChartText">
+                            <span className="totalComments">{totalComments}</span> <br />
+                            <span className="sentimentsText">Sentiments</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="noSentimentDataContainer">
+                          <div className="noSentimentDataCircle" />
+                          <Typography variant="body2" className="noSentimentMessage">
+                            No sentiment data available.
+                          </Typography>
+                        </div>
+                      )}
+                    </div>
+
+                    {showSentiment && (
+                      <div className="sentimentDetails">
+                        <div className="sentimentItem">
+                          <div className="sentimentColorIndicator negativeColor" />
+                          <span className="sentimentText">
+                            Negative | <i>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                        <div className="sentimentItem">
+                          <div className="sentimentColorIndicator neutralColor" />
+                          <span className="sentimentText">
+                            Neutral | <i>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                        <div className="sentimentItem">
+                          <div className="sentimentColorIndicator positiveColor" />
+                          <span className="sentimentText">
+                            Positive | <i>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Grid>
+        </Grid>
 
         {/* Table Comment Section */}
         <Grid item xs={12}>
