@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./App.css";
-import "./reponsive.css";
+// import "./reponsive.css";
 
 Chart.register(...registerables);
 

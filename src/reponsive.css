@@ -1,4 +1,8 @@
 @media (max-width: 1200px) {
+    .youtubeInput {
+      width: 100% !important;
+    }
+
     .commentTablePaper {
       padding: 15px; /* Adjust padding for smaller screens */
     }
