@@ -24,7 +24,7 @@ body {
 }
 
 .commentTubeDivider {
-  width: 100%;
+  width: 100% !important;
   border: 1px solid #E4E0E0FF;
   margin-top: 10px;
   margin-bottom: 40px;
@@ -37,7 +37,7 @@ body {
 }
 
 .youtubeInput {
-  /* width: 100% !important; */
+  width: 100% !important;
   margin-right: 13px;
 }
 
@@ -83,7 +83,6 @@ body {
 
 .videoDetail {
   padding: 8px;
-  margin: 10px;
   width: 100% !important;
 }
 
@@ -147,12 +146,6 @@ body {
   max-width: 100% !important;
 }
 
-.css-1fyyp8j-MuiGrid-root {
-  flex-basis: 100%;
-  flex-grow: 0; 
-  max-width: 100%;
-}
-
 .skeletonContent {
   display: flex;
   align-items: flex-start;
@@ -161,7 +154,7 @@ body {
 .skeletonThumbnail {
   background-color: #e0e0e0;
   width: 100% !important;
-  height: 200px;
+  height: 150px;
   margin-right: 20px;
   border-radius: 8px;
 }
