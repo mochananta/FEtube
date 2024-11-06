@@ -12,6 +12,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./App.css";
 import "./reponsive.css";
 
+
 Chart.register(...registerables);
 
 function App() {
@@ -451,7 +452,7 @@ function App() {
         )}
 
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={12} md={6} lg={6}>
             <div className="commentKeywordPaper">
               <Typography variant="h6" className="commentKeywordTitle">
                 Comment Keywords
@@ -485,7 +486,7 @@ function App() {
           </Grid>
 
           {/* Sentiment Analytic Section */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={12} md={6} lg={6}>
             <div className="sentimentPaper">
               <Typography variant="h6" className="sentimentTitle">
                 Sentiment Analytic

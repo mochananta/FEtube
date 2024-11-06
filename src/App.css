@@ -464,7 +464,7 @@ body {
 
 .extractedCommentTitle {
   font-weight: 500;
-  margin: 10px !important;
+  margin: 20px !important;
 }
 
 .totalCommentsCount {
@@ -679,6 +679,7 @@ h5, h6 {
 .polling-status {
   color: red;
   font-style: italic;
+  padding: 15px;
 }
 
 .pagination-info {

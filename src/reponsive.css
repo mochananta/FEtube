@@ -1,103 +1,40 @@
-@media (max-width: 1200px) {
-  .youtubeInput {
-    width: 100% !important;
-  }
-  
-    .commentTablePaper {
-      padding: 15px; /* Adjust padding for smaller screens */
+@media (max-width: 902px) {
+    .skeletonKeywords {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px; 
+      width: auto; 
     }
   
-    .searchContainer {
-      width: 100%; /* Full width on smaller screens */
-    }
-  
-    .searchContainer:hover {
-      box-shadow: none; /* Remove shadow effect on hover for smaller screens */
-    }
-  
-    .comment-table-paper th,
-    .comment-table-paper td {
-      padding: 8px; /* Reduce padding for smaller screens */
-    }
-  
-    .totalCommentsCount {
-      font-size: 24px; /* Adjust font size for better readability */
-    }
-  
-    .extractedCommentTitle {
-      font-size: 18px; /* Adjust font size for better readability */
-    }
-  
-    .calendarIcon,
-    .downloadIcon {
-      width: 20px; /* Smaller icons for better fitting */
-      height: 20px; 
+    .noKeywordMessage {
+      font-size: 14px; 
+      margin-top: -50px;
     }
 
-    .pagination-info {
-        margin-left: 0; /* Reset margin on smaller screens */
-        text-align: center; /* Center align text */
-      }
-    
-      .pagination {
-        margin-top: 20px; /* Adjust margin for smaller screens */
-      }
-    
-      .pagination-select {
-        width: 50px; /* Smaller width for select */
-      }
-    
-      .keywordBadge {
-        font-size: 12px; /* Adjust font size for badges */
-      }
-  }
-  
-  @media (max-width: 768px) {
-    .datePickerContainer {
-      left: 50%; 
-      transform: translateX(-50%); 
+    .sentimentTitle {
+      margin-left: 50px;
     }
 
-    .tableContainer {
-        margin-top: 15px;
-      }
-    
-      .MuiTableCell-root {
-        font-size: 12px !important; 
-      }
-    
-      .pagination {
-        flex-direction: column; 
-        margin-left: 0; 
-        margin-right: 0;
-      }
-    
-      .pagination-count,
-      .pagination-select {
-        margin: 5px 0; 
-      }
-  }
-  
-  @media (max-height: 557px) {
-    .main-container {
+    .skeletonKeywords {
+      display: none; 
+    }  
+
+    .sentimentText {
+      margin-left: 10px !important; 
+    }
+
+    .noSentimentDataContainer {
       padding: 10px;
+      margin-right: 50px;
     }
   
-    .extractButton {
-      font-size: 14px;
-      padding: 8px;
+    .noSentimentDataCircle {
+      width: 90%; 
+      height: auto;
     }
   
-    .commentTubeTitle {
-      font-size: 20px !important;
-    }
-  
-    .video-description-container {
-      max-height: 100px; 
-    }
-  
-    .loading-spinner {
-      width: 40px; 
-      height: 40px; 
+    .noSentimentMessage {
+      font-size: 14px; 
+      margin-left: 10px;
     }
   }
