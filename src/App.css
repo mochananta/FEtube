@@ -19,8 +19,10 @@ body {
 }
 
 .commentTubeTitle {
-  font-weight: 500 !important;
-  font-size: 25px !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: bold !important;
+  font-size: 22px !important; 
+  letter-spacing: -1px !important;
 }
 
 .commentTubeDivider {
@@ -82,13 +84,19 @@ body {
 }
 
 .videoDetail {
-  padding: 8px;
+  border: 1px solid #e0e0e0; 
+  border-radius: 5px; 
+  padding: 8px; 
+  background-color: #fff; 
+  margin-bottom: 16px; 
   width: 100% !important;
 }
 
 .videoDetailContent {
   display: flex;
   align-items: flex-start;
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 .videoThumbnail {
@@ -119,6 +127,7 @@ body {
   display: flex;
   align-items: center;
   margin-top: 15px;
+  margin-left: 10px;
 }
 
 .uploaderLogo {
@@ -140,68 +149,18 @@ body {
   margin-bottom: -4px;
 }
 
-.videoSkeleton {
-  display: flex;
-  flex-direction: column;
-  max-width: 100% !important;
-}
-
-.skeletonContent {
-  display: flex;
-  align-items: flex-start;
-}
-
-.skeletonThumbnail {
-  background-color: #e0e0e0;
-  width: 100% !important;
-  height: 150px;
-  margin-right: 20px;
-  border-radius: 8px;
-}
-
-.skeletonInfo {
-  flex-grow: 1;
-}
-
-.skeletonLine {
-  background-color: #e0e0e0;
-  height: 20px;
-  width: 100%;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-.skeletonUploaderInfo {
-  display: flex;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.skeletonUploaderLogo {
-  background-color: #e0e0e0;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.skeletonUploaderName {
-  background-color: #e0e0e0;
-  height: 20px;
-  width: 40%;
-  border-radius: 4px;
-}
-
 .noVideoMessage {
-  text-align: center;
-  margin-top: 15px;
   font-style: italic;
+  margin-top: -1px !important;
+  color: #8f8d8d;
+  text-align: left; /* Rata kiri */
+  margin-left: 10px !important;
 }
 
-/* .loadingContainer {
+.loadingContainer {
   text-align: center;
   margin-top: 10px;
-} */
+}
 
 .loading-video {
   display: flex;
@@ -235,8 +194,13 @@ body {
 }
 
 .detailVideoTitle {
-  font-size: 500 !important;
-  margin: 10px !important;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+  font-size: 22px;
+  letter-spacing: -1px;
+  margin-top: 40px !important;
+  text-align: left; /* Menjaga teks tetap rata kiri */
+  margin-left: 10px !important;
 }
 
 .video-title {
@@ -275,20 +239,27 @@ body {
   padding: 37px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: flex-start; 
+  width: 100%; 
 }
 
 .commentKeywordContainer {
-  display: flex;
+  display: flex; 
   flex-wrap: wrap; 
-  gap: 10px;
-  padding: 15px; 
-  margin-bottom: 20px; 
+  gap: 7px; 
+  margin-top: 13px;
+  width: 100%; 
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .commentKeywordTitle {
-  font-weight: 500;
-  margin: 10px !important;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+  font-size: 22px;
+  letter-spacing: -1px;
+  margin-top: 40px !important;
+  text-align: left; /* Menjaga teks tetap rata kiri */
 }
 
 .loadingContainer {
@@ -312,116 +283,110 @@ body {
 }
 
 .commentChip {
-  margin-right: 1px;
-  background-color: #000000; 
-  color: #ffffff; 
-  font-size: 13px; 
-  font-weight: 400;
-  border: 3px solid #ff0000; 
-  border-radius: 20px; 
-  transition: background-color 0.3s ease, box-shadow 0.3s ease; 
+  background-color: #ffffff !important; 
+  color: #000000 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  border: 1px solid #000000 !important; 
+  border-radius: 20px !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
+  padding: 7px 15px !important;
+  white-space: nowrap !important;
+  margin-bottom: 5px !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important; 
 }
 
 .commentChip:hover {
-  background-color: #C7C7C7; 
-  color: white; 
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+  background-color: #C7C7C7 !important; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02); 
+  border: 1px solid #C7C7C7 !important;
 }
 
-.noKeywordContainer {
-  margin-right: auto;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.skeletonKeywords {
-  display: flex;
-  justify-content: space-between;
-  width: 400px;
-  margin-bottom: 10px;
-}
-
-.skeletonBox {
-  background-color: #e0e0e0;
-  height: 30px;
-  width: 30%;
-  border-radius: 20px;
+.selectedKeyword {
+  background-color: #C7C7C7 !important; 
+  border: 2px solid #C7C7C7 !important; 
 }
 
 .noKeywordMessage {
-  text-align: center;
-  margin-top: 15px;
   font-style: italic;
+  margin-top: 10px;
+  color: #a5a1a1;
+  text-align: left; 
 }
 
 .sentimentPaper {
-  margin-top: 10px !important;
-  padding: 35px !important;
+  margin-top: -10px;
+  padding: 35px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
+  align-items: flex-start;
+  width: 100%;
 }
 
 .sentimentTitle {
-  font-weight: 500;
-  margin: 10px !important;
-  margin-left: 65px !important;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+  font-size: 22px;
+  letter-spacing: -1px;
+  margin-top: 50px !important;
+  text-align: left; 
+  padding-left: 35px !important;
 }
 
 .sentimentContainer {
-  margin-left: 60px !important;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; /* Menjaga jarak di antara elemen */
+  width: 100%; /* Pastikan elemen memanfaatkan ruang penuh */
 }
 
 .sentimentChart {
-  position: relative;
   flex: 1;
-  max-width: 200px !important;
-  margin-right: 20px;
-  justify-content: center;
+  margin-right: 30px !important; /* Jarak antara chart dan detail */
+  max-width: 250px; /* Atur ukuran chart */
+}
+
+.sentimentChart {
+  width: 250px;
+  height: 250px;
+  position: relative;
+  margin: 5px;
 }
 
 .sentimentChartText {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
-  transform: translate(-50%, -10%);
+  transform: translate(-50%, -50%);
   text-align: center;
   font-weight: 400;
   font-size: 18px;
 }
 
-
 .totalComments {
   font-weight: 500; 
   font-size: 30px; 
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .sentimentsText {
-  font-weight: normal; 
-  font-size: 13px; 
-  color: #383838;
+  font-size: 14px; 
+  color: rgba(0, 0, 0, 0.6); 
+  font-weight: 400; 
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.noSentimentDataContainer {
-  text-align: center;
-  padding: 20px;
+.noSentimentMessage {
+  font-style: italic;
+  color: #a5a1a1;
+  margin-right: 30px !important;
+  text-align: center; /* Memastikan pesan rata tengah */
+  width: 100%; /* Membuat pesan mengisi seluruh lebar kontainer */
 }
-
- .noSentimentDataCircle {
-    background-color: #e0e0e0;
-    width: 100%;
-    border-radius: 200px;
-    margin-bottom: 10px;
-    margin-top: -22px;
-  }
-
-  .noSentimentMessage {
-    font-style: italic;
-  } 
 
 .sentimentDetails {
   flex: 1;
@@ -464,7 +429,7 @@ body {
 
 .extractedCommentTitle {
   font-weight: 500;
-  margin: 20px !important;
+  margin: 10px !important;
 }
 
 .totalCommentsCount {
@@ -692,7 +657,6 @@ h5, h6 {
 
 .pagination-count {
   color: red;
-  margin-right: 5px; 
   font-size: 13px !important;
 }
 
@@ -725,4 +689,10 @@ h5, h6 {
   margin-left: 8px;
   font-size: 12px; 
   color: #333; 
+}
+
+.noCommentsMessage {
+  font-style: italic;
+  min-width: 100%;
+  color: #a5a1a1;
 }

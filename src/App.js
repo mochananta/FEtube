@@ -12,7 +12,6 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import "./App.css";
 import "./reponsive.css";
 
-
 Chart.register(...registerables);
 
 function App() {
@@ -27,6 +26,7 @@ function App() {
   const [fetchedVideoDetails, setFetchedVideoDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
+  const [selectedKeyword, setSelectedKeyword] = useState(""); // Kembali ke tipe string
   const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [jobId] = useState(null);
@@ -35,16 +35,32 @@ function App() {
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: "text", direction: "ascending" });
   const commentsPerPage = 5;
-  const totalPages = Math.ceil(comments.length / commentsPerPage);
+  const [totalPages, setTotalPages] = useState(0);
   const indexOfLastComment = currentPage * commentsPerPage;
   const indexOfFirstComment = indexOfLastComment - commentsPerPage;
+
+  const handleKeywordClick = (keyword) => {
+    setSelectedKeyword(selectedKeyword === keyword ? null : keyword); // Pilih atau hapus keyword yang sama
+  };
+
+  const filteredCommentsByKeyword = comments.filter((comment) => {
+    return (
+      !selectedKeyword || // Jika tidak ada keyword yang dipilih
+      (comment.keywords && comment.keywords.includes(selectedKeyword)) // atau keyword cocok dengan salah satu yang ada di komentar
+    );
+  });
+
   const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+    if (value > totalPages) {
+      setCurrentPage(totalPages);
+    } else {
+      setCurrentPage(value);
+    }
   };
 
   const renderPollingStatus = () => {
     if (isPolling) {
-      return <p className="polling-status">Polling sedang berlangsung, harap tunggu...</p>;
+      return <p className="polling-status">Extracting, please wait...</p>;
     }
     return null;
   };
@@ -233,7 +249,9 @@ function App() {
 
       const data = await response.json();
       if (data.keyword_analysis) {
-        setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...data.keyword_analysis])]);
+        // Ambil hanya bagian 'keyword' dari data keyword_analysis
+        const keywordsList = data.keyword_analysis.map((item) => item.keyword);
+        setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...keywordsList])]);
       } else {
         throw new Error("Keyword analysis not found in response");
       }
@@ -242,14 +260,14 @@ function App() {
     }
   };
 
-  const calculateSentimentData = (comments) => {
+  const calculateSentimentData = (filteredComments) => {
     const sentimentCounts = {
       Positive: 0,
       Neutral: 0,
       Negative: 0,
     };
 
-    comments.forEach((comment) => {
+    filteredComments.forEach((comment) => {
       const sentimentLabel = comment.sentiment_label;
 
       if (sentimentCounts[sentimentLabel.charAt(0).toUpperCase() + sentimentLabel.slice(1)] !== undefined) {
@@ -271,9 +289,25 @@ function App() {
   };
 
   useEffect(() => {
-    const totalSentiments = calculateSentimentData(comments);
-    setTotalComments(totalSentiments.Positive + totalSentiments.Neutral + totalSentiments.Negative); // Update totalComments
-  }, [comments]);
+    const isDefaultFilter = !selectedDate && !searchTerm && selectedSentiment === "All sentiment" && !selectedKeyword;
+
+    const commentsToProcess = isDefaultFilter
+      ? comments
+      : comments.filter((comment) => {
+          const commentDate = comment.time_formatted ? comment.time_formatted.split(" ")[0] : null;
+          const matchesDate = !selectedDate || commentDate === selectedDateFormatted;
+          const matchesSearchTerm = comment.text && comment.text.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment_label.toLowerCase() === selectedSentiment.toLowerCase();
+          const matchesKeyword = !selectedKeyword || (comment.keywords && comment.keywords.includes(selectedKeyword));
+
+          return matchesDate && matchesSearchTerm && matchesSentiment && matchesKeyword;
+        });
+
+    setTotalComments(commentsToProcess.length);
+    setTotalPages(Math.ceil(commentsToProcess.length / commentsPerPage));
+
+    calculateSentimentData(commentsToProcess);
+  }, [comments, selectedDate, searchTerm, selectedSentiment, selectedKeyword]);
 
   const convertCommentsToCSV = (comments) => {
     const header = "No,User,Comment ID,Comment content,Comment at,Comment keyword,Sentiment\n";
@@ -341,7 +375,9 @@ function App() {
     const matchesSearchTerm = comment.text && comment.text.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSentiment = selectedSentiment === "All sentiment" || comment.sentiment_label.toLowerCase() === selectedSentiment.toLowerCase();
 
-    return matchesDate && matchesSearchTerm && matchesSentiment;
+    const matchesKeyword = !selectedKeyword || (comment.keywords && comment.keywords.includes(selectedKeyword));
+
+    return matchesDate && matchesSearchTerm && matchesSentiment && matchesKeyword;
   });
 
   const commentsToDisplay = filteredComments.slice(indexOfFirstComment, indexOfLastComment);
@@ -394,8 +430,15 @@ function App() {
               Video Detail
             </Typography>
 
-            <Paper elevation={3} className="videoDetail">
-              {fetchedVideoDetails ? (
+            <Grid item xs={12}>
+              {loading ? (
+                <div className="loadingContainer">
+                  <CircularProgress />
+                  <Typography variant="body1" className="loadingText">
+                    Loading video details...
+                  </Typography>
+                </div>
+              ) : fetchedVideoDetails ? (
                 <>
                   <div className="videoDetailContent">
                     <img src={`https://img.youtube.com/vi/${fetchedVideoDetails.video_embed_url.split("/embed/")[1]}/maxresdefault.jpg`} alt="Video Thumbnail" className="videoThumbnail" />
@@ -422,34 +465,13 @@ function App() {
                   </div>
                 </>
               ) : (
-                <div className="videoSkeleton">
-                  <div className="skeletonContent">
-                    <div className="skeletonThumbnail" />
-                    <div className="skeletonInfo">
-                      <div className="skeletonLine" />
-                      <div className="skeletonLine" />
-                      <div className="skeletonLine" />
-                      <div className="skeletonLine" />
-                    </div>
-                  </div>
-                  <div className="skeletonUploaderInfo">
-                    <div className="skeletonUploaderLogo" />
-                    <div className="skeletonUploaderName" />
-                  </div>
-                  <Typography variant="body1" className="noVideoMessage">
-                    No video available
-                  </Typography>
-                </div>
+                <Typography variant="body2" className="noVideoMessage">
+                  No video available yet, please provide youtube video link on the input above.
+                </Typography>
               )}
-            </Paper>
+            </Grid>
           </div>
         </Grid>
-
-        {loading && (
-          <div className="loadingContainer">
-            <div className="loadingSpinner"></div>
-          </div>
-        )}
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={6} lg={6}>
@@ -467,20 +489,13 @@ function App() {
               ) : keywords.length > 0 ? (
                 <div className="commentKeywordContainer">
                   {keywords.map((keyword, index) => (
-                    <Chip key={index} label={keyword} className="commentChip" />
+                    <Chip key={index} label={keyword} className={`commentChip ${selectedKeyword === keyword ? "selectedKeyword" : ""}`} onClick={() => handleKeywordClick(keyword)} />
                   ))}
                 </div>
               ) : (
-                <div className="noKeywordContainer">
-                  <div className="skeletonKeywords">
-                    <div className="skeletonBox" />
-                    <div className="skeletonBox" />
-                    <div className="skeletonBox" />
-                  </div>
-                  <Typography variant="body2" className="noKeywordMessage">
-                    No keywords found for the comments.
-                  </Typography>
-                </div>
+                <Typography variant="body2" className="noKeywordMessage">
+                  No important keyword found yet, please provide YouTube video link on the input above first.
+                </Typography>
               )}
             </div>
           </Grid>
@@ -500,70 +515,65 @@ function App() {
                   </Typography>
                 </div>
               ) : (
-                <div>
-                  <div className="sentimentContainer">
-                    <div className="sentimentChart">
-                      {sentimentData.datasets[0].data.some((value) => value > 0) ? (
-                        <>
-                          <Doughnut
-                            data={sentimentData}
-                            options={{
-                              cutout: "70%",
-                              responsive: true,
-                              plugins: {
-                                legend: {
-                                  display: false,
-                                },
-                                tooltip: {
-                                  callbacks: {
-                                    label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`,
-                                  },
+                <div className="sentimentContainer">
+                  <div className="sentimentChart">
+                    {sentimentData.datasets[0].data.some((value) => value > 0) ? (
+                      <>
+                        <Doughnut
+                          data={sentimentData}
+                          options={{
+                            cutout: "70%",
+                            responsive: true,
+                            plugins: {
+                              legend: {
+                                display: false,
+                              },
+                              tooltip: {
+                                callbacks: {
+                                  label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`,
                                 },
                               },
-                              animation: {
-                                animateScale: true,
-                                animateRotate: true,
-                              },
-                            }}
-                          />
-                          <div className="sentimentChartText">
-                            <span className="totalComments">{totalComments}</span> <br />
-                            <span className="sentimentsText">Sentiments</span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="noSentimentDataContainer">
-                          <div className="noSentimentDataCircle" />
-                          <Typography variant="body2" className="noSentimentMessage">
-                            No sentiment data available.
-                          </Typography>
+                            },
+                            animation: {
+                              animateScale: true,
+                              animateRotate: true,
+                            },
+                          }}
+                        />
+                        <div className="sentimentChartText">
+                          <span className="totalComments">{totalComments}</span> <br />
+                          <span className="sentimentsText">Sentiments</span>
                         </div>
-                      )}
-                    </div>
-
-                    {showSentiment && (
-                      <div className="sentimentDetails">
-                        <div className="sentimentItem">
-                          <div className="sentimentColorIndicator negativeColor" />
-                          <span className="sentimentText">
-                            Negative | <i>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
-                          </span>
-                        </div>
-                        <div className="sentimentItem">
-                          <div className="sentimentColorIndicator neutralColor" />
-                          <span className="sentimentText">
-                            Neutral | <i>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
-                          </span>
-                        </div>
-                        <div className="sentimentItem">
-                          <div className="sentimentColorIndicator positiveColor" />
-                          <span className="sentimentText">
-                            Positive | <i>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
-                          </span>
-                        </div>
-                      </div>
+                      </>
+                    ) : (
+                      <Typography variant="body2" className="noSentimentMessage">
+                        No sentiment data available yet, please provide YouTube video link on the input above first.
+                      </Typography>
                     )}
                   </div>
+
+                  {showSentiment && (
+                    <div className="sentimentDetails">
+                      <div className="sentimentItem">
+                        <div className="sentimentColorIndicator negativeColor" />
+                        <span className="sentimentText">
+                          Negative | <i>{sentimentData.datasets[0].data[2]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[2] / totalComments) * 100).toFixed(0) : 0}%
+                        </span>
+                      </div>
+                      <div className="sentimentItem">
+                        <div className="sentimentColorIndicator neutralColor" />
+                        <span className="sentimentText">
+                          Neutral | <i>{sentimentData.datasets[0].data[1]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[1] / totalComments) * 100).toFixed(0) : 0}%
+                        </span>
+                      </div>
+                      <div className="sentimentItem">
+                        <div className="sentimentColorIndicator positiveColor" />
+                        <span className="sentimentText">
+                          Positive | <i>{sentimentData.datasets[0].data[0]} in total</i> | {totalComments > 0 ? ((sentimentData.datasets[0].data[0] / totalComments) * 100).toFixed(0) : 0}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -585,115 +595,119 @@ function App() {
               </div>
             ) : (
               <>
-                {/* Hanya tampilkan elemen berikut setelah tombol 'Extract Comment' diklik */}
-                {totalComments > 0 && (
-                  <>
-                    <div className="searchContainer">
-                      <img className="searchIcon" src="./search.png" alt="search icon" />
-                      <input type="text" className="searchInput" placeholder="Search comment..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <>
+                  <div className="searchContainer">
+                    {/* Elemen pencarian dan filter */}
+                    <img className="searchIcon" src="./search.png" alt="search icon" />
+                    <input type="text" className="searchInput" placeholder="Search comment..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    {/* Kalender dan ikon lainnya */}
+                    <img className="calendarIcon" src="./date.png" alt="calendar icon" onClick={toggleDatePicker} />
 
-                      <img className="calendarIcon" src="./date.png" alt="calendar icon" onClick={toggleDatePicker} />
+                    {isDatePickerVisible && (
+                      <div className="datePickerContainer" ref={datePickerRef}>
+                        <DatePicker selected={selectedDate} onChange={handleDateChange} inline />
+                      </div>
+                    )}
 
-                      {isDatePickerVisible && (
-                        <div className="datePickerContainer" ref={datePickerRef}>
-                          <DatePicker selected={selectedDate} onChange={handleDateChange} inline />
-                        </div>
-                      )}
+                    <button className="btnDownload" onClick={downloadCSV}>
+                      <img className="downloadIcon" src="./download.png" alt="download icon" />
+                    </button>
 
-                      <button className="btnDownload" onClick={downloadCSV}>
-                        <img className="downloadIcon" src="./download.png" alt="download icon" />
-                      </button>
+                    <select className="customSelect" value={selectedSentiment} onChange={handleSentimentChange}>
+                      <option value="All sentiment">All sentiment</option>
+                      <option value="positive">Positive</option>
+                      <option value="neutral">Neutral</option>
+                      <option value="negative">Negative</option>
+                    </select>
+                  </div>
 
-                      <select className="customSelect" value={selectedSentiment} onChange={handleSentimentChange}>
-                        <option value="All sentiment">All sentiment</option>
-                        <option value="positive">Positive</option>
-                        <option value="neutral">Neutral</option>
-                        <option value="negative">Negative</option>
-                      </select>
-                    </div>
-
-                    <TableContainer className="tableContainer">
-                      <Table stickyHeader>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell className="tableHeader" onClick={() => requestSort("index")}>
-                              No {getIndicator("index")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("author")}>
-                              User {getIndicator("author")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
-                              Comment ID {getIndicator("comment_id")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("text")}>
-                              Comment content {getIndicator("text")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
-                              Comment at {getIndicator("time_formatted")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
-                              Comment keyword {getIndicator("keywords")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
-                              Sentiment {getIndicator("sentiment_label")}
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {sortedCommentsToDisplay.length > 0 ? (
-                            sortedCommentsToDisplay.map((comment, index) => (
-                              <TableRow key={index}>
-                                <TableCell>{indexOfFirstComment + index + 1}</TableCell>
-                                <TableCell>{comment.author}</TableCell>
-                                <TableCell>
-                                  <span className="commentId">{comment.comment_id}</span>
-                                </TableCell>
-                                <TableCell>{comment.text}</TableCell>
-                                <TableCell>{comment.time_formatted}</TableCell>
-                                <TableCell>
-                                  {comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0
-                                    ? comment.keywords.map((keyword, idx) => (
-                                        <span className="keywordBadge" key={idx}>
-                                          {keyword}
-                                        </span>
-                                      ))
-                                    : "no keyword detected"}
-                                </TableCell>
-                                <TableCell>
-                                  <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={7} align="center" className="noComments">
-                                No comments available
+                  <TableContainer className="tableContainer">
+                    <Table stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell className="tableHeader" onClick={() => requestSort("index")}>
+                            No {getIndicator("index")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("author")}>
+                            User {getIndicator("author")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
+                            Comment ID {getIndicator("comment_id")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("text")}>
+                            Comment content {getIndicator("text")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
+                            Comment at {getIndicator("time_formatted")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
+                            Comment keyword {getIndicator("keywords")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
+                            Sentiment {getIndicator("sentiment_label")}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {console.log("Sorted Comments to Display:", sortedCommentsToDisplay)}
+                        {sortedCommentsToDisplay.length > 0 ? (
+                          sortedCommentsToDisplay.map((comment, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{indexOfFirstComment + index + 1}</TableCell>
+                              <TableCell>{comment.author}</TableCell>
+                              <TableCell>
+                                <span className="commentId">{comment.comment_id}</span>
+                              </TableCell>
+                              <TableCell>{comment.text}</TableCell>
+                              <TableCell>{comment.time_formatted}</TableCell>
+                              <TableCell>
+                                {loading ? (
+                                  <CircularProgress size={20} />
+                                ) : comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0 ? (
+                                  comment.keywords.map((keyword, idx) => (
+                                    <span className="keywordBadge" key={idx}>
+                                      {keyword}
+                                    </span>
+                                  ))
+                                ) : (
+                                  "no keyword detected"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {loading ? <CircularProgress size={20} /> : <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>}
                               </TableCell>
                             </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={7} align="center" className="noComments">
+                              No comments available yet, please provide youtube video link on the input above first.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
 
-                    <div className="pagination-info">
-                      <span className="pagination-count" style={{ color: "red" }}>
-                        {commentsToDisplay.length}
-                      </span>{" "}
-                      of {totalPages} results | Go to page:
-                      <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
-                        {Array.from({ length: totalPages }, (_, index) => (
+                  <div className="pagination-info">
+                    <span className="pagination-count" style={{ color: "red" }}>
+                      {Math.min(commentsPerPage, totalComments - (currentPage - 1) * commentsPerPage)}
+                    </span>{" "}
+                    of {totalComments} results | Go to page:
+                    <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
+                      {totalPages > 0 &&
+                        Array.from({ length: totalPages }, (_, index) => (
                           <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
                             {index + 1}
                           </MenuItem>
                         ))}
-                      </Select>
-                    </div>
+                    </Select>
+                  </div>
 
-                    <Grid item xs={12}>
-                      {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
-                    </Grid>
-                  </>
-                )}
+                  <Grid item xs={12}>
+                    {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
+                  </Grid>
+                </>
               </>
             )}
           </div>
