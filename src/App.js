@@ -40,14 +40,11 @@ function App() {
   const indexOfFirstComment = indexOfLastComment - commentsPerPage;
 
   const handleKeywordClick = (keyword) => {
-    setSelectedKeyword(selectedKeyword === keyword ? null : keyword); // Pilih atau hapus keyword yang sama
+    setSelectedKeyword(selectedKeyword === keyword ? null : keyword);
   };
 
   const filteredCommentsByKeyword = comments.filter((comment) => {
-    return (
-      !selectedKeyword || // Jika tidak ada keyword yang dipilih
-      (comment.keywords && comment.keywords.includes(selectedKeyword)) // atau keyword cocok dengan salah satu yang ada di komentar
-    );
+    return !selectedKeyword || (comment.keywords && comment.keywords.includes(selectedKeyword));
   });
 
   const handlePageChange = (event, value) => {
@@ -465,7 +462,7 @@ function App() {
                   </div>
                 </>
               ) : (
-                <Typography variant="body2" className="noVideoMessage">
+                <Typography variant="body2" className="emptyStateContainer">
                   No video available yet, please provide youtube video link on the input above.
                 </Typography>
               )}
@@ -493,7 +490,7 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <Typography variant="body2" className="noKeywordMessage">
+                <Typography variant="body2" className="emptyStateContainer">
                   No important keyword found yet, please provide YouTube video link on the input above first.
                 </Typography>
               )}
@@ -587,6 +584,7 @@ function App() {
           </Typography>
           {loading && <div></div>}
           {renderPollingStatus()}
+
           <div elevation={3} className="commentTablePaper">
             {loading ? (
               <div className="loadingComments">
@@ -595,63 +593,60 @@ function App() {
               </div>
             ) : (
               <>
-                <>
-                  <div className="searchContainer">
-                    {/* Elemen pencarian dan filter */}
-                    <img className="searchIcon" src="./search.png" alt="search icon" />
-                    <input type="text" className="searchInput" placeholder="Search comment..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                    {/* Kalender dan ikon lainnya */}
-                    <img className="calendarIcon" src="./date.png" alt="calendar icon" onClick={toggleDatePicker} />
+                <div className="searchContainer">
+                  {/* Elemen pencarian dan filter */}
+                  <img className="searchIcon" src="./search.png" alt="search icon" />
+                  <input type="text" className="searchInput" placeholder="Search comment..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                  {/* Kalender dan ikon lainnya */}
+                  <img className="calendarIcon" src="./date.png" alt="calendar icon" onClick={toggleDatePicker} />
+                  {isDatePickerVisible && (
+                    <div className="datePickerContainer" ref={datePickerRef}>
+                      <DatePicker selected={selectedDate} onChange={handleDateChange} inline />
+                    </div>
+                  )}
+                  <button className="btnDownload" onClick={downloadCSV}>
+                    <img className="downloadIcon" src="./download.png" alt="download icon" />
+                  </button>
+                  <select className="customSelect" value={selectedSentiment} onChange={handleSentimentChange}>
+                    <option value="All sentiment">All sentiment</option>
+                    <option value="positive">Positive</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="negative">Negative</option>
+                  </select>
+                </div>
 
-                    {isDatePickerVisible && (
-                      <div className="datePickerContainer" ref={datePickerRef}>
-                        <DatePicker selected={selectedDate} onChange={handleDateChange} inline />
-                      </div>
-                    )}
-
-                    <button className="btnDownload" onClick={downloadCSV}>
-                      <img className="downloadIcon" src="./download.png" alt="download icon" />
-                    </button>
-
-                    <select className="customSelect" value={selectedSentiment} onChange={handleSentimentChange}>
-                      <option value="All sentiment">All sentiment</option>
-                      <option value="positive">Positive</option>
-                      <option value="neutral">Neutral</option>
-                      <option value="negative">Negative</option>
-                    </select>
-                  </div>
-
-                  <TableContainer className="tableContainer">
-                    <Table stickyHeader>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell className="tableHeader" onClick={() => requestSort("index")}>
-                            No {getIndicator("index")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("author")}>
-                            User {getIndicator("author")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
-                            Comment ID {getIndicator("comment_id")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("text")}>
-                            Comment content {getIndicator("text")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
-                            Comment at {getIndicator("time_formatted")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
-                            Comment keyword {getIndicator("keywords")}
-                          </TableCell>
-                          <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
-                            Sentiment {getIndicator("sentiment_label")}
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {console.log("Sorted Comments to Display:", sortedCommentsToDisplay)}
-                        {sortedCommentsToDisplay.length > 0 ? (
-                          sortedCommentsToDisplay.map((comment, index) => (
+                {sortedCommentsToDisplay.length > 0 ? (
+                  <>
+                    <TableContainer className="tableContainer">
+                      <Table stickyHeader>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell className="tableHeader" onClick={() => requestSort("index")}>
+                              No {getIndicator("index")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("author")}>
+                              User {getIndicator("author")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
+                              Comment ID {getIndicator("comment_id")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("text")}>
+                              Comment content {getIndicator("text")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
+                              Comment at {getIndicator("time_formatted")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
+                              Comment keyword {getIndicator("keywords")}
+                            </TableCell>
+                            <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
+                              Sentiment {getIndicator("sentiment_label")}
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {console.log("Sorted Comments to Display:", sortedCommentsToDisplay)}
+                          {sortedCommentsToDisplay.map((comment, index) => (
                             <TableRow key={index}>
                               <TableCell>{indexOfFirstComment + index + 1}</TableCell>
                               <TableCell>{comment.author}</TableCell>
@@ -677,37 +672,38 @@ function App() {
                                 {loading ? <CircularProgress size={20} /> : <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>}
                               </TableCell>
                             </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={7} align="center" className="noComments">
-                              No comments available yet, please provide youtube video link on the input above first.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
 
-                  <div className="pagination-info">
-                    <span className="pagination-count" style={{ color: "red" }}>
-                      {Math.min(commentsPerPage, totalComments - (currentPage - 1) * commentsPerPage)}
-                    </span>{" "}
-                    of {totalComments} results | Go to page:
-                    <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
-                      {totalPages > 0 &&
-                        Array.from({ length: totalPages }, (_, index) => (
-                          <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
-                            {index + 1}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </div>
+                    {/* Pagination */}
+                    <div className="pagination-info">
+                      <span className="pagination-count" style={{ color: "red" }}>
+                        {Math.min(commentsPerPage, totalComments - (currentPage - 1) * commentsPerPage)}
+                      </span>{" "}
+                      of {totalComments} results | Go to page:
+                      <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
+                        {totalPages > 0 &&
+                          Array.from({ length: totalPages }, (_, index) => (
+                            <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
+                              {index + 1}
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </div>
 
-                  <Grid item xs={12}>
-                    {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
-                  </Grid>
-                </>
+                    <Grid item xs={12}>
+                      {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
+                    </Grid>
+                  </>
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" className="noComments">
+                      No comments available yet, please provide youtube video link on the input above first.
+                    </TableCell>
+                  </TableRow>
+                )}
               </>
             )}
           </div>

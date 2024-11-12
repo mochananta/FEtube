@@ -1,36 +1,21 @@
 @media (max-width: 912px) {
   .commentKeywordContainer{
-    margin-left: 20px;
-  }
-
-  .videoDetailContent {
-    margin-left: 20px;
+    margin-left: 5px;
   }
 
   .detailVideoTitle {
-    font-size: 18px; 
-    margin-left: 30px !important;
+    margin-left: 5px !important;
   }
 
-  .noVideoMessage {
-    font-size: 14px;
+  .emptyStateContainer {
     text-align: left;
     margin-right: 200px !important;
-    margin-left: 30px !important;
+    margin-left: 15px !important;
   }
 
   .commentKeywordTitle {
-    font-size: 18px;
     margin-top: 30px !important;
-    margin-left: 20px !important;
-  }
-
-  .noKeywordMessage {
-    font-size: 14px;
-    text-align: left;
-    margin-top: 10px;
-    color: #a5a1a1;
-    margin-left: 20px !important;
+    margin-left: 5px !important;
   }
 
   .sentimentTitle {
@@ -41,15 +26,14 @@
 
   .noSentimentMessage {
     font-size: 14px;
-    text-align: left;
+    text-align: center;
     margin-right: 10px !important;
-    width: 100%;
   }
 
   .sentimentChart {
     width: 100%;
     height: 200px;
-    margin-left: 30px;
+    margin-left: 40px;
   }
 
   .sentimentDetails {
