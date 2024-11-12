@@ -26,7 +26,7 @@ function App() {
   const [fetchedVideoDetails, setFetchedVideoDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalComments, setTotalComments] = useState(0);
-  const [selectedKeyword, setSelectedKeyword] = useState(""); // Kembali ke tipe string
+  const [selectedKeyword, setSelectedKeyword] = useState("");
   const [keywords, setKeywords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [jobId] = useState(null);
@@ -246,7 +246,6 @@ function App() {
 
       const data = await response.json();
       if (data.keyword_analysis) {
-        // Ambil hanya bagian 'keyword' dari data keyword_analysis
         const keywordsList = data.keyword_analysis.map((item) => item.keyword);
         setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...keywordsList])]);
       } else {
@@ -431,9 +430,9 @@ function App() {
               {loading ? (
                 <div className="loadingContainer">
                   <CircularProgress />
-                  <Typography variant="body1" className="loadingText">
+                  {/* <Typography variant="body1" className="loadingText">
                     Loading video details...
-                  </Typography>
+                  </Typography> */}
                 </div>
               ) : fetchedVideoDetails ? (
                 <>
@@ -479,9 +478,9 @@ function App() {
               {loading ? (
                 <div className="loadingContainer">
                   <CircularProgress />
-                  <Typography variant="body1" className="loadingText">
+                  {/* <Typography variant="body1" className="loadingText">
                     Loading comment keywords...
-                  </Typography>
+                  </Typography> */}
                 </div>
               ) : keywords.length > 0 ? (
                 <div className="commentKeywordContainer">
@@ -507,9 +506,9 @@ function App() {
               {loading ? (
                 <div className="loadingContainer1">
                   <CircularProgress />
-                  <Typography variant="body1" className="loadingText">
+                  {/* <Typography variant="body1" className="loadingText">
                     Loading sentiment analytic...
-                  </Typography>
+                  </Typography> */}
                 </div>
               ) : (
                 <div className="sentimentContainer">
@@ -549,7 +548,7 @@ function App() {
                     )}
                   </div>
 
-                  {showSentiment && (
+                  {showSentiment && sentimentData.datasets[0].data.some((value) => value > 0) && (
                     <div className="sentimentDetails">
                       <div className="sentimentItem">
                         <div className="sentimentColorIndicator negativeColor" />
@@ -585,7 +584,7 @@ function App() {
           {loading && <div></div>}
           {renderPollingStatus()}
 
-          <div elevation={3} className="commentTablePaper">
+          <Paper elevation={3} className="commentTablePaper">
             {loading ? (
               <div className="loadingComments">
                 <CircularProgress />
@@ -615,98 +614,100 @@ function App() {
                   </select>
                 </div>
 
-                {sortedCommentsToDisplay.length > 0 ? (
-                  <>
-                    <TableContainer className="tableContainer">
-                      <Table stickyHeader>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell className="tableHeader" onClick={() => requestSort("index")}>
-                              No {getIndicator("index")}
+                <TableContainer className="tableContainer">
+                  <Table stickyHeader>
+                    {sortedCommentsToDisplay.length > 0 && (
+                      <TableHead>
+                        <TableRow>
+                          <TableCell className="tableHeader" onClick={() => requestSort("index")}>
+                            No {getIndicator("index")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("author")}>
+                            User {getIndicator("author")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
+                            Comment ID {getIndicator("comment_id")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("text")}>
+                            Comment content {getIndicator("text")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
+                            Comment at {getIndicator("time_formatted")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
+                            Comment keyword {getIndicator("keywords")}
+                          </TableCell>
+                          <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
+                            Sentiment {getIndicator("sentiment_label")}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                    )}
+                    <TableBody>
+                      {sortedCommentsToDisplay.length > 0 ? (
+                        sortedCommentsToDisplay.map((comment, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{indexOfFirstComment + index + 1}</TableCell>
+                            <TableCell>{comment.author}</TableCell>
+                            <TableCell>
+                              <span className="commentId">{comment.comment_id}</span>
                             </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("author")}>
-                              User {getIndicator("author")}
+                            <TableCell>{comment.text}</TableCell>
+                            <TableCell>{comment.time_formatted}</TableCell>
+                            <TableCell>
+                              {loading ? (
+                                <CircularProgress size={20} />
+                              ) : comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0 ? (
+                                comment.keywords.map((keyword, idx) => (
+                                  <span className="keywordBadge" key={idx}>
+                                    {keyword}
+                                  </span>
+                                ))
+                              ) : (
+                                "no keyword detected"
+                              )}
                             </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("comment_id")}>
-                              Comment ID {getIndicator("comment_id")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("text")}>
-                              Comment content {getIndicator("text")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("time_formatted")}>
-                              Comment at {getIndicator("time_formatted")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("keywords")}>
-                              Comment keyword {getIndicator("keywords")}
-                            </TableCell>
-                            <TableCell className="tableHeader" onClick={() => requestSort("sentiment_label")}>
-                              Sentiment {getIndicator("sentiment_label")}
+                            <TableCell>
+                              {loading ? <CircularProgress size={20} /> : <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>}
                             </TableCell>
                           </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {console.log("Sorted Comments to Display:", sortedCommentsToDisplay)}
-                          {sortedCommentsToDisplay.map((comment, index) => (
-                            <TableRow key={index}>
-                              <TableCell>{indexOfFirstComment + index + 1}</TableCell>
-                              <TableCell>{comment.author}</TableCell>
-                              <TableCell>
-                                <span className="commentId">{comment.comment_id}</span>
-                              </TableCell>
-                              <TableCell>{comment.text}</TableCell>
-                              <TableCell>{comment.time_formatted}</TableCell>
-                              <TableCell>
-                                {loading ? (
-                                  <CircularProgress size={20} />
-                                ) : comment.keywords && Array.isArray(comment.keywords) && comment.keywords.length > 0 ? (
-                                  comment.keywords.map((keyword, idx) => (
-                                    <span className="keywordBadge" key={idx}>
-                                      {keyword}
-                                    </span>
-                                  ))
-                                ) : (
-                                  "no keyword detected"
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {loading ? <CircularProgress size={20} /> : <span className={`sentimentLabel ${comment.sentiment_label}`}>{comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}</span>}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} align="center" className="noComments">
+                            No comments available yet, please provide youtube video link on the input above first.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
-                    {/* Pagination */}
-                    <div className="pagination-info">
-                      <span className="pagination-count" style={{ color: "red" }}>
-                        {Math.min(commentsPerPage, totalComments - (currentPage - 1) * commentsPerPage)}
-                      </span>{" "}
-                      of {totalComments} results | Go to page:
-                      <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
-                        {totalPages > 0 &&
-                          Array.from({ length: totalPages }, (_, index) => (
-                            <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
-                              {index + 1}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </div>
+                {sortedCommentsToDisplay.length > 0 && (
+                  <div className="pagination-info">
+                    <span className="pagination-count" style={{ color: "red" }}>
+                      {Math.min(commentsPerPage, totalComments - (currentPage - 1) * commentsPerPage)}
+                    </span>{" "}
+                    of {totalComments} results | Go to page:
+                    <Select value={currentPage} onChange={(e) => handlePageChange(e, e.target.value)} className="pagination-select">
+                      {totalPages > 0 &&
+                        Array.from({ length: totalPages }, (_, index) => (
+                          <MenuItem key={index + 1} value={index + 1} style={{ fontSize: "13px" }}>
+                            {index + 1}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </div>
+                )}
 
-                    <Grid item xs={12}>
-                      {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
-                    </Grid>
-                  </>
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center" className="noComments">
-                      No comments available yet, please provide youtube video link on the input above first.
-                    </TableCell>
-                  </TableRow>
+                {sortedCommentsToDisplay.length > 0 && (
+                  <Grid item xs={12}>
+                    {loading ? <CircularProgress size={20} /> : <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" className="pagination" />}
+                  </Grid>
                 )}
               </>
             )}
-          </div>
+          </Paper>
         </Grid>
       </Grid>
     </>
