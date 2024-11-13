@@ -251,6 +251,7 @@ body {
   flex-direction: column;
   align-items: flex-start; 
   width: 100%; 
+  margin-left: -10px !important;
 }
 
 .commentKeywordContainer {
@@ -270,7 +271,8 @@ body {
   font-size: 22px;
   letter-spacing: -1px;
   margin-top: 40px !important;
-  text-align: left; 
+  text-align: left;
+  margin-right: 20px !important; 
 }
 
 .loadingContainer {
