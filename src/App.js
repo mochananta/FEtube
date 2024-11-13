@@ -247,7 +247,7 @@ function App() {
       const data = await response.json();
       if (data.keyword_analysis) {
         const keywordsList = data.keyword_analysis.map((item) => item.keyword);
-        setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...keywordsList])]);
+        setKeywords((prevKeywords) => [...new Set([...prevKeywords, ...keywordsList])].slice(0, 15));
       } else {
         throw new Error("Keyword analysis not found in response");
       }
@@ -478,9 +478,6 @@ function App() {
               {loading ? (
                 <div className="loadingContainer">
                   <CircularProgress />
-                  {/* <Typography variant="body1" className="loadingText">
-                    Loading comment keywords...
-                  </Typography> */}
                 </div>
               ) : keywords.length > 0 ? (
                 <div className="commentKeywordContainer">
