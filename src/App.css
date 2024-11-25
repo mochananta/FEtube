@@ -128,13 +128,12 @@ body {
   display: flex;
   align-items: center;
   margin-top: 15px;
-  margin-left: 10px;
 }
 
 .uploaderLogo {
   width: 30px;
   height: auto;
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .videoChannel .channelName {
